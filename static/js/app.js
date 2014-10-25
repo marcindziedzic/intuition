@@ -25,6 +25,35 @@ app.controller('BoardController', function ($scope) {
         $scope.x_headers =  _.range(1, days + 1);
 
         return  days;
-    }
+    };
+
+    // in normal world this should give me predefined colour picker
+    $scope.toggleColour = function(event) {
+        // get available css classess from server
+        var availableCssClasses = ['great_success', 'moderate_success', 'weak_success', 'neutral', 'weak_failure', 'moderate_failure', 'great_failure' ]
+
+        var el = $('#' + event.target.id);
+        var classess = el.attr('class').split(' ');
+
+        for (var i = 0; i < classess.length; i++) {
+            var cssClass = classess[i];
+
+            var _index_of = _.indexOf(availableCssClasses, cssClass);
+            if (_index_of > -1) {
+
+                el.removeClass(cssClass);
+
+                // will fail at the end of the list
+                var _new_index = _index_of + 1;
+                if (availableCssClasses.length == _new_index) {
+                    _new_index = 0;
+                }
+
+                el.addClass(availableCssClasses[_new_index]);
+            }
+
+        }
+
+    };
 
 });

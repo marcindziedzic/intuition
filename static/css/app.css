@@ -1,0 +1,28 @@
+
+.great_success {
+    background-color: #475C13;
+}
+
+.moderate_success {
+    background-color: #479C13;
+}
+
+.weak_success {
+    background-color: #84EB44;
+}
+
+.neutral {
+    background-color: #FFFFFF;
+}
+
+.weak_failure {
+    background-color: #EDED18;
+}
+
+.moderate_failure {
+    background-color: #D4730D;
+}
+
+.great_failure {
+    background-color: #D43B0D;
+}
