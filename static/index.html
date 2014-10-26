@@ -21,57 +21,44 @@
     <link rel="stylesheet" href="css/app.css" />
 
 
+    <!-- TODO remove unused frameworks -->
     <title>Intuition</title>
 </head>
 <body>
 
     <form ng-controller="BoardController">
-        Days in current month {{daysInCurrentMonth()}}
 
-        <label for="board_name">Board name:</label>
-        <input type="text" ng-model="board.name"  />
+        <p>Days in current month {{daysInCurrentMonth()}}</p>
+        <p>Board id <strong>{{board._id}}</strong></p>
+
         <label for="board_type">Board type:</label>
-        <select ng-model="board.type" ng-options="type for type in boardTypes">
+        <select ng-model="board.type" ng-options="type for type in defaults.board_types">
           <option value="">-- choose board type --</option>
         </select>
-        <button ng-click="save(board)">Submit</button>
 
-        <table class="table table-bordered">
-            <tr>
-                <th>#</th>
-                <th ng-repeat="x in x_headers">{{x}}</th>
-            </tr>
-            <tr ng-repeat="y in y_headers" >
+        <div ng-show="board.type == 'calendar'">
+            <label for="board_name">Board name:</label>
+            <input type="text" ng-model="board.name"  />
 
-                <th>{{y}}</th>
-                <!-- id represents joined index of element -->
-                <td id="{{y_headers.indexOf(y)}}_{{$index}}" ng-repeat="x in x_headers" class="neutral" ng-click="toggleColour($event)">
+            <table class="table table-bordered">
+                <tr>
+                    <th>#</th>
+                    <th ng-repeat="x in x_headers">{{x}}</th>
+                </tr>
+                <tr ng-repeat="y in y_headers" >
 
-                </td>
-            </tr>
-        </table>
+                    <th>{{y}}</th>
+                    <!-- id represents joined index of element -->
+                    <td id="{{$index}}_{{y_headers.indexOf(y)}}" ng-repeat="x in x_headers" class="neutral" ng-click="toggleColor($event)" >
 
-        <select id="colorselector">
-            <option value="104" data-color="#4C524A">green</option>
-            <option value="106" data-color="#A0522D">sienna</option>
-            <option value="47" data-color="#CD5C5C" selected="selected">indianred</option>
-            <option value="87" data-color="#FF4500">orangered</option>
-            <option value="15" data-color="#DC143C">crimson</option>
-            <option value="24" data-color="#FF8C00">darkorange</option>
-            <option value="78" data-color="#C71585">mediumvioletred</option>
-        </select>
+                    </td>
+                </tr>
+            </table>
+            <button ng-click="save(board)">Submit</button>
+        </div>
+
 
     </form>
-
-
-
-
-    <p>Contextual background</p>
-    <p class="bg-primary">...</p>
-    <p class="bg-success">...</p>
-    <p class="bg-info">...</p>
-    <p class="bg-warning">...</p>
-    <p class="bg-danger">...</p>
 
 
 

@@ -1,11 +1,16 @@
 var app = angular.module('main', []);
 
-app.controller('BoardController', function ($scope) {
+app.controller('BoardController', function ($scope, $http) {
+
+    $http.get('/defaults').success(function(data) {
+        $scope.defaults = data
+    });
 
     $scope.x_headers = []
-    $scope.y_headers = ['klatka', 'plecy', 'ramiona', 'brzuch', 'nogi', 'biceps', 'triceps']
+    $scope.y_headers = ['klatka', 'plecy', 'ramiona', 'brzuch', 'nogi', 'biceps', 'triceps'];
 
-    $scope.boardTypes = ['calendar']
+    // get available css classess from server
+    availableCssClasses = ['neutral', 'great_success', 'moderate_success', 'weak_success', 'weak_failure', 'moderate_failure', 'great_failure'];
 
     $scope.daysInCurrentMonth = function () {
 
@@ -27,10 +32,9 @@ app.controller('BoardController', function ($scope) {
         return  days;
     };
 
+    // remove jquery from this file
     // in normal world this should give me predefined colour picker
-    $scope.toggleColour = function(event) {
-        // get available css classess from server
-        var availableCssClasses = ['great_success', 'moderate_success', 'weak_success', 'neutral', 'weak_failure', 'moderate_failure', 'great_failure' ]
+    $scope.toggleColor = function(event) {
 
         var el = $('#' + event.target.id);
         var classess = el.attr('class').split(' ');
@@ -41,6 +45,12 @@ app.controller('BoardController', function ($scope) {
             var _index_of = _.indexOf(availableCssClasses, cssClass);
             if (_index_of > -1) {
 
+
+                var attr = el.attr('data-cell');
+                if (typeof attr !== typeof undefined) {
+                    el.removeAttr('data-cell');
+                }
+
                 el.removeClass(cssClass);
 
                 // will fail at the end of the list
@@ -48,12 +58,45 @@ app.controller('BoardController', function ($scope) {
                 if (availableCssClasses.length == _new_index) {
                     _new_index = 0;
                 }
+                var new_class = availableCssClasses[_new_index];
 
-                el.addClass(availableCssClasses[_new_index]);
+                el.addClass(new_class);
+                el.attr('data-cell', new_class);
             }
 
         }
 
     };
+
+    $scope.save = function(board) {
+        board.x_axis = $scope.x_headers;
+        board.y_axis = $scope.y_headers;
+        board.cells = [];
+
+        // filter neutrals here
+        var cells = angular.element(document.querySelectorAll("td[data-cell]"));
+
+        angular.forEach(cells, function (cell, _) {
+
+            if (cell.attributes['data-cell'].value != 'neutral') {
+
+                var xy = cell.id.split('_');
+
+                var _cell = {
+                    'x': xy[0],
+                    'y': xy[1],
+                    'val': cell.attributes['data-cell'].value
+                };
+
+                board.cells.push(_cell)
+            }
+
+        });
+
+        $http.post('/board', board).success(function(data, status, headers, config) {
+            board._id = data.id;
+        });
+
+    }
 
 });
