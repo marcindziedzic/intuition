@@ -1,5 +1,5 @@
-# TODO cover with tests
-def get_number_of_days_in_current_month():
+
+def days_in_current_month():
     import calendar
     import datetime
 

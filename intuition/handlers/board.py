@@ -1,6 +1,9 @@
 from bson.objectid import ObjectId
 from tornado.web import RequestHandler
 from tornado import gen
+
+from intuition.utils import days_in_current_month
+
 import json
 
 
@@ -34,7 +37,8 @@ class BoardDefaultsHandler(RequestHandler):
         #     ]
 
         d = {
-            'board_types': ['calendar']
+            'board_types': ['calendar'],
+            'days_in_current_month': days_in_current_month(),
         }
 
         self.write(d)

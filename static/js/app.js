@@ -3,34 +3,15 @@ var app = angular.module('main', []);
 app.controller('BoardController', function ($scope, $http) {
 
     $http.get('/defaults').success(function(data) {
-        $scope.defaults = data
-    });
+        $scope.board_types = data.board_types;
+        $scope.days_in_current_month = data.days_in_current_month;
 
-    $scope.x_headers = []
-    $scope.y_headers = ['klatka', 'plecy', 'ramiona', 'brzuch', 'nogi', 'biceps', 'triceps'];
+        $scope.x_headers = _.range(1, data.days_in_current_month + 1);
+        $scope.y_headers = ['klatka', 'plecy', 'ramiona', 'brzuch', 'nogi', 'biceps', 'triceps'];
+    });
 
     // get available css classess from server
     availableCssClasses = ['neutral', 'great_success', 'moderate_success', 'weak_success', 'weak_failure', 'moderate_failure', 'great_failure'];
-
-    $scope.daysInCurrentMonth = function () {
-
-        // Return today's date and time
-        var currentTime = new Date()
-
-        // returns the month (from 0 to 11)
-        var month = currentTime.getMonth() + 1
-
-        // returns the year (four digits)
-        var year = currentTime.getFullYear()
-
-        // returns number of days in month
-        var days = new Date(year, month, 0).getDate();
-
-        // TODO remove this logic from here
-        $scope.x_headers =  _.range(1, days + 1);
-
-        return  days;
-    };
 
     // remove jquery from this file
     // in normal world this should give me predefined colour picker

@@ -12,27 +12,21 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" />
 
-    <!-- boostrap colorpicker dependencies -->
-    <script type="text/javascript" src="color-selector/bootstrap-colorselector.js"></script>
-    <link rel="stylesheet" href="color-selector/bootstrap-colorselector.css" />
-
     <!-- my app -->
     <script type="text/javascript" src="js/app.js"></script>
     <link rel="stylesheet" href="css/app.css" />
 
-
-    <!-- TODO remove unused frameworks -->
     <title>Intuition</title>
 </head>
 <body>
 
     <form ng-controller="BoardController">
 
-        <p>Days in current month {{daysInCurrentMonth()}}</p>
+        <p>Days in current month {{days_in_current_month}}</p>
         <p>Board id <strong>{{board._id}}</strong></p>
 
         <label for="board_type">Board type:</label>
-        <select ng-model="board.type" ng-options="type for type in defaults.board_types">
+        <select ng-model="board.type" ng-options="type for type in board_types">
           <option value="">-- choose board type --</option>
         </select>
 
