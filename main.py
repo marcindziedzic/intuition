@@ -2,14 +2,14 @@ import os
 
 import motor
 from tornado.ioloop import IOLoop
-from tornado.web import RequestHandler, Application
+from tornado.web import Application
 
 from intuition.routing import routes
 
 
 if os.environ.get('MONGOHQ_URL'):
     print('Connecting to mongo using: ', os.environ['MONGOHQ_URL'])
-    db = motor.MotorClient(os.environ['MONGOHQ_URL']).db()
+    db = motor.MotorClient(os.environ['MONGOHQ_URL']).get_default_database()
 else:
     print('Connecting to local mongo instance')
     db = motor.MotorClient().intuition
