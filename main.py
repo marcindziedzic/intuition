@@ -34,6 +34,7 @@ def make_app():
     ], **settings)
 
 if __name__ == '__main__':
+    http_port = os.environ.get('PORT', 8888)
     app = make_app()
-    app.listen(8888)
+    app.listen(http_port)
     IOLoop.current().start()
