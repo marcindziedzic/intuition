@@ -7,7 +7,7 @@ app.controller('BoardController', function ($scope, $http) {
         $scope.days_in_current_month = data.days_in_current_month;
 
         $scope.x_headers = _.range(1, data.days_in_current_month + 1);
-        $scope.y_headers = ['klatka', 'plecy', 'ramiona', 'brzuch', 'nogi', 'biceps', 'triceps'];
+        $scope.y_headers = ['comma-separated-y-headers'];
     });
 
     // get available css classess from server

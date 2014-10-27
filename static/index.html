@@ -32,7 +32,16 @@
 
         <div ng-show="board.type == 'calendar'">
             <label for="board_name">Board name:</label>
-            <input type="text" ng-model="board.name"  />
+            <input type="text" ng-model="board.name" required/>
+            <br/>
+
+            <label for="board_xaxis">Board xaxis</label>
+            <input type="text" ng-model="x_headers" ng-list required/>
+            <br/>
+
+            <label for="board_yaxis">Board yaxis</label>
+            <input type="text" ng-model="y_headers" ng-list required/>
+            <br/>
 
             <table class="table table-bordered">
                 <tr>
