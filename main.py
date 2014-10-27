@@ -9,7 +9,7 @@ from intuition.routing import routes
 
 if os.environ.get('MONGOHQ_URL'):
     print('Connecting to mongo using: ', os.environ['MONGOHQ_URL'])
-    db = motor.MotorClient(os.environ['MONGOHQ_URL']).intuition
+    db = motor.MotorClient(os.environ['MONGOHQ_URL']).db()
 else:
     print('Connecting to local mongo instance')
     db = motor.MotorClient().intuition
