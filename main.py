@@ -2,9 +2,9 @@ import os
 
 import motor
 from tornado.ioloop import IOLoop
-from tornado.web import RequestHandler, Application, url
+from tornado.web import RequestHandler, Application
 
-from intuition.handlers.board import BoardDefaultsHandler, BoardHandler
+from intuition.routing import routes
 
 
 if os.environ.get('MONGOHQ_URL'):
@@ -21,17 +21,9 @@ settings = {
 }
 
 
-class HelloHandler(RequestHandler):
-    def get(self):
-        self.write('Hello, world')
-
-
 def make_app():
-    return Application([
-        url(r"/", HelloHandler),
-        url(r"/board", BoardHandler),
-        url(r"/defaults", BoardDefaultsHandler),
-    ], **settings)
+    return Application(routes, **settings)
+
 
 if __name__ == '__main__':
     http_port = os.environ.get('PORT', 8888)

@@ -1,14 +1,13 @@
+import json
+
 from bson.objectid import ObjectId
 from tornado.web import RequestHandler
 from tornado import gen
 
 from intuition.utils import days_in_current_month
 
-import json
-
 
 class BoardHandler(RequestHandler):
-
     @gen.coroutine
     def post(self, *args, **kwargs):
         board = json.loads(self.request.body.decode('utf-8'))
@@ -27,7 +26,7 @@ class BoardDefaultsHandler(RequestHandler):
     def get(self, *args, **kwargs):
         # colors = \
         # [
-        #         'great_success',
+        # 'great_success',
         #         'moderate_success',
         #         'weak_success',
         #         'neutral',
@@ -42,4 +41,3 @@ class BoardDefaultsHandler(RequestHandler):
         }
 
         self.write(d)
-
