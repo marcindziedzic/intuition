@@ -6,8 +6,9 @@ app.controller('BoardController', function ($scope, $http) {
         $scope.board_types = data.board_types;
         $scope.days_in_current_month = data.days_in_current_month;
 
-        $scope.x_headers = _.range(1, data.days_in_current_month + 1);
-        $scope.y_headers = ['comma-separated-y-headers'];
+        $scope.board = { };
+        $scope.board.x_axis = _.range(1, data.days_in_current_month + 1);
+        $scope.board.y_axis = ['comma','separated','list','of','activities'];
     });
 
     // get available css classess from server
@@ -50,8 +51,6 @@ app.controller('BoardController', function ($scope, $http) {
     };
 
     $scope.save = function(board) {
-        board.x_axis = $scope.x_headers;
-        board.y_axis = $scope.y_headers;
         board.cells = [];
 
         // filter neutrals here

@@ -32,27 +32,27 @@
 
         <div ng-show="board.type == 'calendar'">
             <label for="board_name">Board name:</label>
-            <input type="text" ng-model="board.name" required/>
+            <input type="text" ng-model="board.name" ng-required="true" />
             <br/>
 
             <label for="board_xaxis">Board xaxis</label>
-            <input type="text" ng-model="x_headers" ng-list required/>
+            <input type="text" ng-model="board.x_axis" ng-list ng-required="true"/>
             <br/>
 
             <label for="board_yaxis">Board yaxis</label>
-            <input type="text" ng-model="y_headers" ng-list required/>
+            <input type="text" ng-model="board.y_axis" ng-list ng-required="true"/>
             <br/>
 
             <table class="table table-bordered">
                 <tr>
                     <th>#</th>
-                    <th ng-repeat="x in x_headers">{{x}}</th>
+                    <th ng-repeat="x in board.x_axis">{{x}}</th>
                 </tr>
-                <tr ng-repeat="y in y_headers" >
+                <tr ng-repeat="y in board.y_axis" >
 
                     <th>{{y}}</th>
                     <!-- id represents joined index of element -->
-                    <td id="{{$index}}_{{y_headers.indexOf(y)}}" ng-repeat="x in x_headers" class="neutral" ng-click="toggleColor($event)" >
+                    <td id="{{$index}}_{{board.y_axis.indexOf(y)}}" ng-repeat="x in board.x_axis" class="neutral" ng-click="toggleColor($event)" >
 
                     </td>
                 </tr>
