@@ -10,13 +10,15 @@ from intuition.routing import routes
 if os.environ.get('MONGOHQ_URL'):
     print('Connecting to mongo using: ', os.environ['MONGOHQ_URL'])
     db = motor.MotorClient(os.environ['MONGOHQ_URL']).get_default_database()
+    debug = False
 else:
     print('Connecting to local mongo instance')
     db = motor.MotorClient().intuition
+    debug = True
 
 settings = {
     "static_path": os.path.join(os.path.dirname(__file__), "static"),
-    "debug": True,
+    "debug": debug,
     "db": db
 }
 

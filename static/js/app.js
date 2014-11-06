@@ -1,15 +1,51 @@
-var app = angular.module('main', []);
+var app = angular.module('main', ["ngRoute"]);
 
-app.controller('BoardController', function ($scope, $http) {
+app.config(function ($routeProvider) {
+    $routeProvider.
+        when("/boards", {
+            templateUrl: "templates/board.html",
+            controller: "BoardController"
+        }).
+        when("/boards/:id", {
+            templateUrl: "templates/board.html",
+            controller: "BoardController"
+        }).
+        otherwise({
+            redirectTo: "/boards"
+        });
+});
 
-    $http.get('/defaults').success(function(data) {
-        $scope.board_types = data.board_types;
-        $scope.days_in_current_month = data.days_in_current_month;
 
-        $scope.board = { };
-        $scope.board.x_axis = _.range(1, data.days_in_current_month + 1);
-        $scope.board.y_axis = ['comma','separated','list','of','activities'];
-    });
+app.controller('BoardController', function ($scope, $http, $routeParams) {
+
+    if ($routeParams.id) {
+        // set this value to some considerable value, or remove it
+        $scope.days_in_current_month = 31;
+
+        // TODO load defaults
+        // TODO initialize cells
+        // TODO split services
+
+        var board_id = $routeParams.id;
+        console.warn('loading board:' + board_id);
+
+        $http.get('/board?id=' + board_id).success(function (data) {
+            console.warn('board loaded: ' + data);
+            $scope.board = data;
+        });
+
+    } else {
+
+        $http.get('/defaults').success(function(data) {
+            $scope.board_types = data.board_types;
+            $scope.days_in_current_month = data.days_in_current_month;
+
+            $scope.board = { };
+            $scope.board.x_axis = _.range(1, data.days_in_current_month + 1);
+            $scope.board.y_axis = ['comma','separated','list','of','activities'];
+        });
+
+    }
 
     // get available css classess from server
     availableCssClasses = ['neutral', 'great_success', 'moderate_success', 'weak_success', 'weak_failure', 'moderate_failure', 'great_failure'];

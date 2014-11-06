@@ -8,6 +8,16 @@ from intuition.utils import days_in_current_month
 
 
 class BoardHandler(RequestHandler):
+
+    @gen.coroutine
+    def get(self, *args, **kwargs):
+        db = self.settings['db']
+        board_id = self.get_argument('id')
+        board = yield db.boards.find_one(ObjectId(board_id))
+        board['_id'] = str(board['_id'])
+        self.set_header('Content-Type', 'application/javascript')
+        self.write(board)
+
     @gen.coroutine
     def post(self, *args, **kwargs):
         board = json.loads(self.request.body.decode('utf-8'))

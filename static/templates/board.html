@@ -1,0 +1,41 @@
+<form>
+
+    <p>Days in current month {{days_in_current_month}}</p>
+    <p>Board id <strong>{{board._id}}</strong></p>
+
+    <label for="board_type">Board type:</label>
+    <select ng-model="board.type" ng-options="type for type in board_types">
+      <option value="">-- choose board type --</option>
+    </select>
+
+    <div ng-show="board.type == 'calendar'">
+        <label for="board_name">Board name:</label>
+        <input type="text" ng-model="board.name" ng-required="true" />
+        <br/>
+
+        <label for="board_xaxis">Board xaxis</label>
+        <input type="text" ng-model="board.x_axis" ng-list ng-required="true"/>
+        <br/>
+
+        <label for="board_yaxis">Board yaxis</label>
+        <input type="text" ng-model="board.y_axis" ng-list ng-required="true"/>
+        <br/>
+
+        <table class="table table-bordered">
+            <tr>
+                <th>#</th>
+                <th ng-repeat="x in board.x_axis">{{x}}</th>
+            </tr>
+            <tr ng-repeat="y in board.y_axis" >
+
+                <th>{{y}}</th>
+                <!-- id represents joined index of element -->
+                <td id="{{$index}}_{{board.y_axis.indexOf(y)}}" ng-repeat="x in board.x_axis" class="neutral" ng-click="toggleColor($event)" >
+
+                </td>
+            </tr>
+        </table>
+        <button ng-click="save(board)">Submit</button>
+    </div>
+
+</form>
