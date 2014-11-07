@@ -30,7 +30,9 @@
 
                 <th>{{y}}</th>
                 <!-- id represents joined index of element -->
-                <td id="{{$index}}_{{board.y_axis.indexOf(y)}}" ng-repeat="x in board.x_axis" class="neutral" ng-click="toggleColor($event)" >
+
+                <!-- class="neutral" -->
+                <td id="{{$index}}_{{board.y_axis.indexOf(y)}}" ng-repeat="x in board.x_axis" ng-class="get_cell_classes({{$index}},{{board.y_axis.indexOf(y)}})" ng-click="toggleColor($event)" >
 
                 </td>
             </tr>
