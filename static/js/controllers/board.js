@@ -6,6 +6,7 @@ app.controller('BoardController', function ($scope, $http, $routeParams) {
     $http.get('/defaults').success(function(data) {
         $scope.board_types = data.board_types;
         $scope.days_in_current_month = data.days_in_current_month;
+        $scope.current_day = data.current_day;
         colorScheme = data.color_scheme;
 
         if ($routeParams.id) {

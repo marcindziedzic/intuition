@@ -24,7 +24,8 @@
         <table class="table table-bordered">
             <tr>
                 <th>#</th>
-                <th ng-repeat="x in board.x_axis">{{x}}</th>
+                <th ng-repeat="x in board.x_axis"
+                    ng-style="{ 'background-color': x == current_day ? '#FFFFCC' : ''}">{{x}}</th>
             </tr>
             <tr ng-repeat="y in board.y_axis" >
 
