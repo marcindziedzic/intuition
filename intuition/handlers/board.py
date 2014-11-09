@@ -1,10 +1,29 @@
 import json
+import pymongo
 
 from bson.objectid import ObjectId
 from tornado.web import RequestHandler
 from tornado import gen
 
 from intuition.utils import days_in_current_month
+
+
+class BoardsHandler(RequestHandler):
+
+    @gen.coroutine
+    def get(self, *args, **kwargs):
+        db = self.settings['db']
+        user_id = self.get_argument('user_id')
+
+        cursor = db.boards.find({'user_id': user_id}, {'_id': 1, 'name': 1})
+
+        boards = []
+        while (yield cursor.fetch_next):
+            q = cursor.next_object()
+            q['_id'] = str(q['_id'])
+            boards.append(q)
+
+        self.write({'boards': boards})
 
 
 class BoardHandler(RequestHandler):

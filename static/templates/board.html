@@ -1,7 +1,11 @@
-<form>
+<form name="boardManagement">
 
     <p>Days in current month {{days_in_current_month}}</p>
     <p>Board id <strong>{{board._id}}</strong></p>
+
+    <label for="board_user_id">User id:</label>
+    <input type="text" ng-model="board.user_id" ng-required="true"/>
+    <br/>
 
     <label for="board_type">Board type:</label>
     <select ng-model="board.type" ng-options="type for type in board_types">
@@ -37,7 +41,7 @@
                 </td>
             </tr>
         </table>
-        <button ng-click="save(board)">Submit</button>
+        <button ng-disabled="boardManagement.$invalid" ng-click="save(board)">Submit</button>
     </div>
 
 </form>
