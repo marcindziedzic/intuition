@@ -34,19 +34,18 @@ class BoardDefaultsHandler(RequestHandler):
     # better use default colors instead of css classes, it's easier to replace
     # cache everything from this method
     def get(self, *args, **kwargs):
-        # colors = \
-        # [
-        # 'great_success',
-        #         'moderate_success',
-        #         'weak_success',
-        #         'neutral',
-        #         'weak_failure',
-        #         'moderate_failure',
-        #         'great_failure'
-        #     ]
+        color_scheme = [
+            'neutral',
+            'great_success',
+            'moderate_success',
+            'weak_success',
+            'weak_failure',
+            'moderate_failure',
+            'great_failure']
 
         d = {
             'board_types': ['calendar'],
+            'color_scheme': color_scheme,
             'days_in_current_month': days_in_current_month(),
         }
 
