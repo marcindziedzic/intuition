@@ -1,5 +1,5 @@
 // use dynamic data binding if possible instead of direct cells manipulation
-app.controller('BoardController', function ($scope, $http, $routeParams) {
+app.controller('BoardController', function ($scope, $http, $routeParams, $sessionStorage) {
 
     var colorScheme = [];
 
@@ -15,6 +15,7 @@ app.controller('BoardController', function ($scope, $http, $routeParams) {
             });
         } else {
             $scope.board = { };
+            $scope.board.user_id = $sessionStorage.userId;
             $scope.board.cells = [];
             $scope.board.x_axis = _.range(1, $scope.days_in_current_month + 1);
             $scope.board.y_axis = ['comma','separated','list','of','activities'];

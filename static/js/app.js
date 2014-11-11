@@ -1,8 +1,12 @@
-var app = angular.module('main', ["ngRoute"]);
+var app = angular.module('main', ["ngRoute", 'ngStorage']);
 
 app.config(function ($routeProvider) {
     $routeProvider.
-        when("/dashboard/:userId", {
+        when("/login", {
+            templateUrl: "templates/login.html",
+            controller: "LoginController"
+        }).
+        when("/dashboard", {
             templateUrl: "templates/dashboard.html",
             controller: "DashboardController"
         }).
@@ -15,6 +19,6 @@ app.config(function ($routeProvider) {
             controller: "BoardController"
         }).
         otherwise({
-            redirectTo: "/dashboard/1"
+            redirectTo: "/login"
         });
 });
