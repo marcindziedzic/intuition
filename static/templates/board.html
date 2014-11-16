@@ -31,13 +31,15 @@
                 <th ng-repeat="x in board.x_axis"
                     ng-style="{ 'background-color': x == current_day ? '#FFFFCC' : ''}">{{x}}</th>
             </tr>
-            <tr ng-repeat="y in board.y_axis" >
+            <tr ng-repeat="y in board.y_axis">
 
                 <th>{{y}}</th>
                 <td id="{{$index}}_{{board.y_axis.indexOf(y)}}"
                     ng-repeat="x in board.x_axis"
                     ng-class="getCellClasses({{$index}},{{board.y_axis.indexOf(y)}})"
-                    ng-click="toggleColor($event)" >
+                    ng-click="toggleColor($event)"
+                        data-cell="true"
+                        >
                 </td>
             </tr>
         </table>

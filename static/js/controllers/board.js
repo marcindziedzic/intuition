@@ -22,8 +22,8 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
         }
     });
 
-    $scope.getCellClasses = function(x, y) {
-        var cell = _getCellFromBoard($scope.board, x, y);
+    $scope.getCellClasses = function (x, y) {
+        var cell = _getCellFromBoard($scope.board.cells, x, y);
         if (cell != null) {
             return cell.val;
         }
@@ -56,14 +56,18 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
         var el = document.getElementById(elementId);
         el.classList.remove(currentColorClass);
         el.classList.add(newColorClass);
-
-        el.setAttribute('data-cell-updated', 'true');
     };
 
     var _getCurrentColorClass = function(element_id) {
         var el = document.getElementById(element_id);
-        var classes = el.classList;
+        if (el == null) {
+            return null;
+        }
+        return _getCurrentColorClassFromElement(el);
+    };
 
+    var _getCurrentColorClassFromElement = function (el) {
+        var classes = el.classList;
         for (var i = 0; i < classes.length; i++) {
             var colorClass = classes[i];
 
@@ -72,21 +76,20 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
                 return colorClass;
             }
         }
-
         return null;
     };
 
-    var _getCellFromBoard = function(board, x, y) {
-        var idx = _getIndexOfCellInBoard(board, x, y);
+    var _getCellFromBoard = function(cells, x, y) {
+        var idx = _getIndexOfCellInBoard(cells, x, y);
         if (idx > -1) {
-            return board.cells[idx];
+            return cells[idx];
         }
         return null;
     };
 
-    var _getIndexOfCellInBoard = function (board, x, y) {
-        for (var i = 0; i < board.cells.length; i++) {
-            var cell = board.cells[i];
+    var _getIndexOfCellInBoard = function (cells, x, y) {
+        for (var i = 0; i < cells.length; i++) {
+            var cell = cells[i];
             if (cell.x == x && cell.y == y) {
                 return i;
             }
@@ -94,47 +97,37 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
         return -1;
     };
 
-    var _createOrUpdateCellsInBoard = function(board) {
-        var cells = angular.element(document.querySelectorAll("td[data-cell-updated]"));
+    var _readCells = function() {
+        var cells = angular.element(document.querySelectorAll("td[data-cell]"));
 
+        var _cells = [];
         angular.forEach(cells, function (cell, _) {
-
             var current_color = _getCurrentColorClass(cell.id);
 
-            var xy = cell.id.split('_');
-            var x = xy[0];
-            var y = xy[1];
-
-            var _indexOfCell = _getIndexOfCellInBoard(board, x, y);
-            if (_indexOfCell > -1) {
-                // remove cell from board if exists
-                board.cells.splice(_indexOfCell, 1);
-            }
-
-            // initialize and push new cell
             if (current_color != 'neutral') {
+                var xy = cell.id.split('_');
+                var x = xy[0];
+                var y = xy[1];
+
                 var _cell = {
-                    'x': x,
-                    'y': y,
+                    'x': parseInt(x),
+                    'y': parseInt(y),
                     'val': current_color
                 };
 
-                board.cells.push(_cell)
+                _cells.push(_cell);
             }
-
-            cell.removeAttribute('data-cell-updated');
-
         });
+
+        return _cells;
     };
 
     $scope.save = function(board) {
-
-        _createOrUpdateCellsInBoard(board);
+        board.cells = _readCells();
 
         $http.post('/board', board).success(function(data) {
             board._id = data.id;
         });
-
     }
 
 });
