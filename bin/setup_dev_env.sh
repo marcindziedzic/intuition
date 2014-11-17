@@ -2,6 +2,9 @@
 
 ENV_PATH=~/.virtualenvs/intuition
 
+# setup nodejs
+# setup mongodb
+
 function setup_python {
     sudo apt-get install python3.4-dev
 }
