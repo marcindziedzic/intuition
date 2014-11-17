@@ -39,17 +39,17 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
     // TODO tmp space
     // TODO handle y watch
     // TODO cleanup
+    // TODO add support for undefined (all removed, all added)
+    // TODO write tests for this method
     var watch = function () {
         $scope.$watchCollection("x_axis", function (newValue, oldValue) {
 
             // detect change and push new hcell
             if (_.isUndefined(oldValue)) {
-                console.info('oldValue isUndefined');
                 return;
             }
 
             if (_.isUndefined(newValue)) {
-                console.info('newValue isUndefined');
                 return;
             }
 
@@ -93,7 +93,6 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
 
             // element added
             if (newValue.length > oldValue.length) {
-
 
                 for (var i = 0; i < newValue.length; i++) {
                     console.info('index: ' + i);
