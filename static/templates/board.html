@@ -18,25 +18,25 @@
         <br/>
 
         <label for="board_xaxis">Board xaxis</label>
-        <input type="text" ng-model="board.x_axis" ng-list ng-required="true"/>
+        <input type="text" ng-model="x_axis" ng-list ng-required="true"/>
         <br/>
 
         <label for="board_yaxis">Board yaxis</label>
-        <input type="text" ng-model="board.y_axis" ng-list ng-required="true"/>
+        <input type="text" ng-model="y_axis" ng-list ng-required="true"/>
         <br/>
 
         <table class="table table-bordered">
             <tr>
                 <th>#</th>
                 <th ng-repeat="x in board.x_axis"
-                    ng-style="{ 'background-color': x == current_day ? '#FFFFCC' : ''}">{{x}}</th>
+                    ng-style="{ 'background-color': x == current_day ? '#FFFFCC' : ''}">{{x.val}}</th>
             </tr>
             <tr ng-repeat="y in board.y_axis">
 
-                <th>{{y}}</th>
-                <td id="{{$index}}_{{board.y_axis.indexOf(y)}}"
+                <th>{{y.val}}</th>
+                <td id="{{x.id}}_{{y.id}}"
                     ng-repeat="x in board.x_axis"
-                    ng-class="getCellClasses({{$index}},{{board.y_axis.indexOf(y)}})"
+                    ng-class="getCellClasses({{x.id}},{{y.id}})"
                     ng-click="toggleColor($event)"
                         data-cell="true"
                         >

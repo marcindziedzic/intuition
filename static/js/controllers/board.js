@@ -9,18 +9,152 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
         $scope.current_day = data.current_day;
         colorScheme = data.color_scheme;
 
+        // TODO remove duplications
         if ($routeParams.id) {
             $http.get('/board?id=' + $routeParams.id).success(function (data) {
                 $scope.board = data;
+
+                $scope.x_axis = _extractVals($scope.board.x_axis);
+                $scope.y_axis = _extractVals($scope.board.y_axis);
+
+                watch();
             });
         } else {
+            $scope.x_axis = _.range(1, $scope.days_in_current_month + 1);
+            $scope.y_axis = ['comma','separated','list','of','activities'];
+
             $scope.board = { };
             $scope.board.user_id = $sessionStorage.userId;
+            $scope.board.x_axis_id_seq = 0;
+            $scope.board.y_axis_id_seq = 0;
             $scope.board.cells = [];
-            $scope.board.x_axis = _.range(1, $scope.days_in_current_month + 1);
-            $scope.board.y_axis = ['comma','separated','list','of','activities'];
+
+            $scope.board.x_axis = _transformIntoStruct($scope.x_axis, _nextXStruct);
+            $scope.board.y_axis = _transformIntoStruct($scope.y_axis, _nextYStruct);
+
+            watch();
         }
     });
+
+    // TODO tmp space
+    // TODO handle y watch
+    // TODO cleanup
+    var watch = function () {
+        $scope.$watchCollection("x_axis", function (newValue, oldValue) {
+
+            // detect change and push new hcell
+            if (_.isUndefined(oldValue)) {
+                console.info('oldValue isUndefined');
+                return;
+            }
+
+            if (_.isUndefined(newValue)) {
+                console.info('newValue isUndefined');
+                return;
+            }
+
+            // rename
+            if (oldValue.length == newValue.length) {
+                for (var i = 0; i < newValue.length; i++) {
+                    var simple_x = newValue[i];
+                    var complex_x = $scope.board.x_axis[i];
+
+                    if (simple_x != complex_x.val) {
+                        console.info('rename: ' + complex_x.val + " -> " + simple_x);
+                        complex_x.val = simple_x;
+                    }
+                }
+            }
+
+            // element removed
+            if (oldValue.length > newValue.length) {
+                var notMatching = _.filter($scope.board.x_axis, function (complex) {
+                    // TODO replace with _.contains
+                    var contains = false;
+                    for (var i = 0; i < newValue.length; i++) {
+                        var simple = newValue[i];
+                        if (complex.val == simple.toString()) {
+                            contains = true;
+                            break;
+                        }
+                    }
+                    return contains == false;
+                });
+
+                for (var i = 0; i < notMatching.length; i++) {
+                    var c = notMatching[i];
+
+                    console.info('removing: ' + c.val);
+
+                    var idx = $scope.board.x_axis.indexOf(c);
+                    $scope.board.x_axis.splice(idx, 1);
+                }
+            }
+
+            // element added
+            if (newValue.length > oldValue.length) {
+
+
+                for (var i = 0; i < newValue.length; i++) {
+                    console.info('index: ' + i);
+
+                    var simple_x = newValue[i];
+                    var complex_x = $scope.board.x_axis[i];
+
+                    if (_.isUndefined(complex_x)) {
+                        var xhead = _nextXStruct(simple_x);
+                        $scope.board.x_axis.splice(i, 0, xhead);
+                    } else if (simple_x != complex_x.val) {
+                        var xhead = _nextXStruct(simple_x);
+
+                        // rename element in complex structure
+                        console.info('replacing: ' + complex_x.val + ' -> ' + complex_x.val.replace(simple_x, ''));
+                        var newVal = complex_x.val.replace(simple_x, '');
+                        newVal = newVal.trim();
+
+                        complex_x.val = newVal;
+
+                        $scope.board.x_axis.splice(i, 0, xhead);
+                    }
+                }
+            }
+
+        });
+    };
+
+    var _extractVals = function (structs) {
+        return _.map(structs, function(s) { return s.val; });
+    };
+
+    var _next = function(val , f) {
+        return {
+            'id': f(),
+            'val': val
+        };
+    };
+
+    var _nextXStruct = function (val) {
+        return _next(val, function() {
+            $scope.board.x_axis_id_seq++;
+            return $scope.board.x_axis_id_seq;
+        });
+    };
+
+    var _nextYStruct = function (val) {
+        return _next(val, function () {
+            $scope.board.y_axis_id_seq++;
+            return $scope.board.y_axis_id_seq;
+        });
+    };
+
+    var _transformIntoStruct = function (axis, createFn) {
+        var seq = [];
+        for (var i = 0; i < axis.length; i++) {
+            var struct = createFn(axis[i]);
+            seq.push(struct);
+        }
+        return seq;
+    };
 
     $scope.getCellClasses = function (x, y) {
         var cell = _getCellFromBoard($scope.board.cells, x, y);
