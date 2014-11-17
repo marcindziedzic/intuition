@@ -9,15 +9,14 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
         $scope.current_day = data.current_day;
         colorScheme = data.color_scheme;
 
-        // TODO remove duplications
         if ($routeParams.id) {
             $http.get('/board?id=' + $routeParams.id).success(function (data) {
                 $scope.board = data;
 
-                $scope.x_axis = _extractVals($scope.board.x_axis);
-                $scope.y_axis = _extractVals($scope.board.y_axis);
+                $scope.x_axis = _extractValues($scope.board.x_axis);
+                $scope.y_axis = _extractValues($scope.board.y_axis);
 
-                watch();
+                _watch();
             });
         } else {
             $scope.x_axis = _.range(1, $scope.days_in_current_month + 1);
@@ -32,102 +31,96 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
             $scope.board.x_axis = _transformIntoStruct($scope.x_axis, _nextXStruct);
             $scope.board.y_axis = _transformIntoStruct($scope.y_axis, _nextYStruct);
 
-            watch();
+            _watch();
         }
     });
 
-    // TODO tmp space
-    // TODO handle y watch
-    // TODO cleanup
-    // TODO add support for undefined (all removed, all added)
     // TODO write tests for this method
-    var watch = function () {
+    // TODO test manually and fix errors
+    // TODO add support for undefined (all removed, all added)
+    var _watch = function () {
         $scope.$watchCollection("x_axis", function (newValue, oldValue) {
-
-            // detect change and push new hcell
-            if (_.isUndefined(oldValue)) {
-                return;
-            }
-
-            if (_.isUndefined(newValue)) {
-                return;
-            }
-
-            // rename
-            if (oldValue.length == newValue.length) {
-                for (var i = 0; i < newValue.length; i++) {
-                    var simple_x = newValue[i];
-                    var complex_x = $scope.board.x_axis[i];
-
-                    if (simple_x != complex_x.val) {
-                        console.info('rename: ' + complex_x.val + " -> " + simple_x);
-                        complex_x.val = simple_x;
-                    }
-                }
-            }
-
-            // element removed
-            if (oldValue.length > newValue.length) {
-                var notMatching = _.filter($scope.board.x_axis, function (complex) {
-                    // TODO replace with _.contains
-                    var contains = false;
-                    for (var i = 0; i < newValue.length; i++) {
-                        var simple = newValue[i];
-                        if (complex.val == simple.toString()) {
-                            contains = true;
-                            break;
-                        }
-                    }
-                    return contains == false;
-                });
-
-                for (var i = 0; i < notMatching.length; i++) {
-                    var c = notMatching[i];
-
-                    console.info('removing: ' + c.val);
-
-                    var idx = $scope.board.x_axis.indexOf(c);
-                    $scope.board.x_axis.splice(idx, 1);
-                }
-            }
-
-            // element added
-            if (newValue.length > oldValue.length) {
-
-                for (var i = 0; i < newValue.length; i++) {
-                    console.info('index: ' + i);
-
-                    var simple_x = newValue[i];
-                    var complex_x = $scope.board.x_axis[i];
-
-                    if (_.isUndefined(complex_x)) {
-                        var xhead = _nextXStruct(simple_x);
-                        $scope.board.x_axis.splice(i, 0, xhead);
-                    } else if (simple_x != complex_x.val) {
-                        var xhead = _nextXStruct(simple_x);
-
-                        // rename element in complex structure
-                        console.info('replacing: ' + complex_x.val + ' -> ' + complex_x.val.replace(simple_x, ''));
-                        var newVal = complex_x.val.replace(simple_x, '');
-                        newVal = newVal.trim();
-
-                        complex_x.val = newVal;
-
-                        $scope.board.x_axis.splice(i, 0, xhead);
-                    }
-                }
-            }
-
+            _updateCells(newValue, oldValue, $scope.board.x_axis, _nextXStruct);
+        });
+        $scope.$watchCollection("y_axis", function (newValue, oldValue) {
+            _updateCells(newValue, oldValue, $scope.board.y_axis, _nextYStruct);
         });
     };
 
-    var _extractVals = function (structs) {
+    var _updateCells = function (newValue, oldValue, axis, nextFn) {
+
+        if (_.isUndefined(oldValue)) {
+            return;
+        }
+
+        if (_.isUndefined(newValue)) {
+            return;
+        }
+
+        // rename
+        if (oldValue.length == newValue.length) {
+            for (var i = 0; i < newValue.length; i++) {
+                var itemValue = newValue[i];
+                var struct = axis[i];
+
+                if (itemValue != struct.val) {
+                    struct.val = itemValue;
+                }
+            }
+        }
+
+        // element removed
+        if (oldValue.length > newValue.length) {
+            var removedStructs = _.filter(axis, function (struct) {
+                // TODO cover with tests and replace with _.contains
+                var contains = false;
+                for (var i = 0; i < newValue.length; i++) {
+                    var itemValue = newValue[i];
+                    if (struct.val == itemValue.toString()) {
+                        contains = true;
+                        break;
+                    }
+                }
+                return contains == false;
+            });
+
+            for (var i = 0; i < removedStructs.length; i++) {
+                var struct = removedStructs[i];
+                axis.splice(axis.indexOf(struct), 1);
+            }
+        }
+
+        // element added
+        if (newValue.length > oldValue.length) {
+
+            for (var i = 0; i < newValue.length; i++) {
+
+                var itemValue = newValue[i];
+                var struct = axis[i];
+
+                if (_.isUndefined(struct)) {
+                    var newStruct = nextFn(itemValue);
+                    axis.splice(i, 0, newStruct);
+                } else if (itemValue != struct.val) {
+                    var newStruct = nextFn(itemValue);
+
+                    // rename element in complex structure
+                    var newStructVal = struct.val.replace(itemValue, '');
+                    struct.val = newStructVal.trim();
+
+                    axis.splice(i, 0, newStruct);
+                }
+            }
+        }
+    };
+
+    var _extractValues = function (structs) {
         return _.map(structs, function(s) { return s.val; });
     };
 
-    var _next = function(val , f) {
+    var _next = function(val , fn) {
         return {
-            'id': f(),
+            'id': fn(),
             'val': val
         };
     };
