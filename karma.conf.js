@@ -15,10 +15,15 @@ module.exports = function (config) {
 
         // list of files / patterns to load in the browser
         files: [
-            'https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular.min.js',
+            'https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular.js',
             'https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular-route.js',
-            'https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min.js',
-            'static/js/**/*.js'
+            'https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular-mocks.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore.js',
+            'static/libs/ngStorage/ngStorage.min.js',
+            'static/js/app.js',
+            'static/js/controllers/*.js',
+            'static/js/services/*.js',
+            'static/js/tests/**/*.js'
         ],
 
 
