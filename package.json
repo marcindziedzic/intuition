@@ -1,8 +1,9 @@
 {
-  "devDependencies": {
-      "karma": "*",
-      "karma-chrome-launcher": "*",
-      "karma-firefox-launcher": "*",
-      "karma-jasmine": "*"
-  }
+    "devDependencies": {
+        "karma": "*",
+        "karma-chrome-launcher": "*",
+        "karma-firefox-launcher": "*",
+        "karma-jasmine": "*",
+        "jasmine-core": "*"
+    }
 }
