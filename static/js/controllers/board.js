@@ -1,5 +1,4 @@
-// use dynamic data binding if possible instead of direct cells manipulation
-app.controller('BoardController', function ($scope, $http, $routeParams, $sessionStorage) {
+app.controller('BoardController', function ($scope, $http, $routeParams, $sessionStorage, boardService) {
 
     var colorScheme = [];
 
@@ -13,8 +12,8 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
             $http.get('/board?id=' + $routeParams.id).success(function (data) {
                 $scope.board = data;
 
-                $scope.x_axis = _extractValues($scope.board.x_axis);
-                $scope.y_axis = _extractValues($scope.board.y_axis);
+                $scope.x_axis = boardService.transformIntoArray($scope.board.x_axis);
+                $scope.y_axis = boardService.transformIntoArray($scope.board.y_axis);
 
                 _watch();
             });
@@ -28,124 +27,34 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
             $scope.board.y_axis_id_seq = 0;
             $scope.board.cells = [];
 
-            $scope.board.x_axis = _transformIntoStruct($scope.x_axis, _nextXStruct);
-            $scope.board.y_axis = _transformIntoStruct($scope.y_axis, _nextYStruct);
+            $scope.board.x_axis = boardService.transformIntoStruct($scope.x_axis, _nextXStruct);
+            $scope.board.y_axis = boardService.transformIntoStruct($scope.y_axis, _nextYStruct);
 
             _watch();
         }
     });
 
-    // TODO write tests for this method
-    // TODO test manually and fix errors
-    // TODO add support for undefined (all removed, all added)
     var _watch = function () {
         $scope.$watchCollection("x_axis", function (newValue, oldValue) {
-            _updateCells(newValue, oldValue, $scope.board.x_axis, _nextXStruct);
+            boardService.update(newValue, oldValue, $scope.board.x_axis, _nextXStruct);
         });
         $scope.$watchCollection("y_axis", function (newValue, oldValue) {
-            _updateCells(newValue, oldValue, $scope.board.y_axis, _nextYStruct);
+            boardService.update(newValue, oldValue, $scope.board.y_axis, _nextYStruct);
         });
-    };
-
-    var _updateCells = function (newValue, oldValue, axis, nextFn) {
-
-        if (_.isUndefined(oldValue)) {
-            return;
-        }
-
-        if (_.isUndefined(newValue)) {
-            return;
-        }
-
-        // rename
-        if (oldValue.length == newValue.length) {
-            for (var i = 0; i < newValue.length; i++) {
-                var itemValue = newValue[i];
-                var struct = axis[i];
-
-                if (itemValue != struct.val) {
-                    struct.val = itemValue;
-                }
-            }
-        }
-
-        // element removed
-        if (oldValue.length > newValue.length) {
-            var removedStructs = _.filter(axis, function (struct) {
-                // TODO cover with tests and replace with _.contains
-                var contains = false;
-                for (var i = 0; i < newValue.length; i++) {
-                    var itemValue = newValue[i];
-                    if (struct.val == itemValue.toString()) {
-                        contains = true;
-                        break;
-                    }
-                }
-                return contains == false;
-            });
-
-            for (var i = 0; i < removedStructs.length; i++) {
-                var struct = removedStructs[i];
-                axis.splice(axis.indexOf(struct), 1);
-            }
-        }
-
-        // element added
-        if (newValue.length > oldValue.length) {
-
-            for (var i = 0; i < newValue.length; i++) {
-
-                var itemValue = newValue[i];
-                var struct = axis[i];
-
-                if (_.isUndefined(struct)) {
-                    var newStruct = nextFn(itemValue);
-                    axis.splice(i, 0, newStruct);
-                } else if (itemValue != struct.val) {
-                    var newStruct = nextFn(itemValue);
-
-                    // rename element in complex structure
-                    var newStructVal = struct.val.replace(itemValue, '');
-                    struct.val = newStructVal.trim();
-
-                    axis.splice(i, 0, newStruct);
-                }
-            }
-        }
-    };
-
-    var _extractValues = function (structs) {
-        return _.map(structs, function(s) { return s.val; });
-    };
-
-    var _next = function(val , fn) {
-        return {
-            'id': fn(),
-            'val': val
-        };
     };
 
     var _nextXStruct = function (val) {
-        return _next(val, function() {
+        return boardService.createStruct(val, function() {
             $scope.board.x_axis_id_seq++;
             return $scope.board.x_axis_id_seq;
         });
     };
 
     var _nextYStruct = function (val) {
-        return _next(val, function () {
+        return boardService.createStruct(val, function () {
             $scope.board.y_axis_id_seq++;
             return $scope.board.y_axis_id_seq;
         });
-    };
-
-    var _transformIntoStruct = function (axis, createFn) {
-        var seq = [];
-        for (var i = 0; i < axis.length; i++) {
-            var struct = createFn(axis[i]);
-            seq.push(struct);
-        }
-        return seq;
     };
 
     $scope.getCellClasses = function (x, y) {
