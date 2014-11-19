@@ -1,40 +1,40 @@
-describe("Board Service Specification", function () {
+describe("Axis Specification", function () {
 
-    var _boardService;
+    var _axis;
     var _factoryFn;
 
     beforeEach(module('main'));
 
-    beforeEach(inject(function (boardService) {
-        _boardService = boardService;
+    beforeEach(inject(function (axis) {
+        _axis = axis;
         _factoryFn = function(val) { return { val: val }; };
     }));
 
-    it('module defines boardService', function() {
-        expect(_boardService).toBeDefined();
+    it('module defines axis module', function() {
+        expect(_axis).toBeDefined();
     });
 
     it('should do nothing when old axis vals are not defined', function() {
         var oldAxisVals;
-        _boardService.update(null, oldAxisVals, null, null);
+        _axis.update(null, oldAxisVals, null, null);
 
     });
 
     it('should do nothing when new axis values are not defined', function() {
         var newAxisVals;
-        _boardService.update(newAxisVals, null, null, null);
+        _axis.update(newAxisVals, null, null, null);
     });
 
     it('should not change new and old axis when performing update', function () {
         var _oldAxisVals = ['monday', 'tuesday', 'wednesday'];
         var _newAxisVals = ['tuesday', 'wednesday'];
-        var _axis = [
+        var _axisStruct = [
             { val: 'monday' },
             { val: 'tuesday' },
             { val: 'wednesday' }
         ];
 
-        _boardService.update(_newAxisVals, _oldAxisVals, _axis, null);
+        _axis.update(_newAxisVals, _oldAxisVals, _axisStruct, null);
 
         expect(_oldAxisVals).toEqual(['monday', 'tuesday', 'wednesday']);
         expect(_newAxisVals).toEqual(['tuesday', 'wednesday']);
@@ -43,15 +43,15 @@ describe("Board Service Specification", function () {
     it('should rename axis structure when new and old axises have eq length', function () {
         var _oldAxisVals = ['monday', 'tuesday', 'wednesday'];
         var _newAxisVals = ['saturday', 'sunday', 'wednesday'];
-        var _axis = [
+        var _axisStruct = [
             { val: 'monday' },
             { val: 'tuesday' },
             { val: 'wednesday' }
         ];
 
-        _boardService.update(_newAxisVals, _oldAxisVals, _axis, null);
+        _axis.update(_newAxisVals, _oldAxisVals, _axisStruct, null);
 
-        expect(_axis).toEqual([
+        expect(_axisStruct).toEqual([
             { val: 'saturday' },
             { val: 'sunday' },
             { val: 'wednesday' }
@@ -61,7 +61,7 @@ describe("Board Service Specification", function () {
     it('should remove items not defined in new axis', function () {
         var _oldAxisVals = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
         var _newAxisVals = ['tuesday', 'friday', 'saturday'];
-        var _axis = [
+        var _axisStruct = [
             { val: 'monday' },
             { val: 'tuesday' },
             { val: 'wednesday' },
@@ -71,9 +71,9 @@ describe("Board Service Specification", function () {
             { val: 'sunday' }
         ];
 
-        _boardService.update(_newAxisVals, _oldAxisVals, _axis, null);
+        _axis.update(_newAxisVals, _oldAxisVals, _axisStruct, null);
 
-        expect(_axis).toEqual([
+        expect(_axisStruct).toEqual([
             { val: 'tuesday' },
             { val: 'friday' },
             { val: 'saturday' }
@@ -83,15 +83,15 @@ describe("Board Service Specification", function () {
     it('should push new items into the axis of a board', function () {
         var _oldAxisVals = ['monday', 'tuesday', 'wednesday'];
         var _newAxisVals = ['sunday', 'monday', 'saturday', 'tuesday', 'wednesday', 'thursday', 'friday'];
-        var _axis = [
+        var _axisStruct = [
             { val: 'monday' },
             { val: 'tuesday' },
             { val: 'wednesday' }
         ];
 
-        _boardService.update(_newAxisVals, _oldAxisVals, _axis, _factoryFn);
+        _axis.update(_newAxisVals, _oldAxisVals, _axisStruct, _factoryFn);
 
-        expect(_axis).toEqual([
+        expect(_axisStruct).toEqual([
             { val: 'sunday' },
             { val: 'monday' },
             { val: 'saturday' },
@@ -103,7 +103,7 @@ describe("Board Service Specification", function () {
     });
 
     it('should generate structure holding new board axis', function() {
-        var struct = _boardService.createStruct('monday', function() { return 100 });
+        var struct = _axis.createStruct('monday', function() { return 100 });
         expect(struct).toEqual({
             'id': 100,
             'val': 'monday'
@@ -111,9 +111,9 @@ describe("Board Service Specification", function () {
     });
 
     it('should transform simple array into axis structure', function() {
-        var _axis = ['monday', 'tuesday', 'wednesday'];
+        var _axisArray = ['monday', 'tuesday', 'wednesday'];
 
-        var _axisStructure = _boardService.transformIntoStruct(_axis, _factoryFn);
+        var _axisStructure = _axis.transformIntoStruct(_axisArray, _factoryFn);
 
         expect(_axisStructure).toEqual([
             { val: 'monday' },
@@ -129,9 +129,9 @@ describe("Board Service Specification", function () {
             { val: 'wednesday' }
         ];
 
-        var _axis = _boardService.transformIntoArray(_axisStructure);
+        var _axisArray = _axis.transformIntoArray(_axisStructure);
 
-        expect(_axis).toEqual(['monday', 'tuesday', 'wednesday']);
+        expect(_axisArray).toEqual(['monday', 'tuesday', 'wednesday']);
     });
 
 });

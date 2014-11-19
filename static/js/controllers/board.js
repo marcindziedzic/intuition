@@ -1,4 +1,4 @@
-app.controller('BoardController', function ($scope, $http, $routeParams, $sessionStorage, boardService) {
+app.controller('BoardController', function ($scope, $http, $routeParams, $sessionStorage, axis) {
 
     var colorScheme = [];
 
@@ -12,8 +12,8 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
             $http.get('/board?id=' + $routeParams.id).success(function (data) {
                 $scope.board = data;
 
-                $scope.x_axis = boardService.transformIntoArray($scope.board.x_axis);
-                $scope.y_axis = boardService.transformIntoArray($scope.board.y_axis);
+                $scope.x_axis = axis.transformIntoArray($scope.board.x_axis);
+                $scope.y_axis = axis.transformIntoArray($scope.board.y_axis);
 
                 _watch();
             });
@@ -27,8 +27,8 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
             $scope.board.y_axis_id_seq = 0;
             $scope.board.cells = [];
 
-            $scope.board.x_axis = boardService.transformIntoStruct($scope.x_axis, _nextXStruct);
-            $scope.board.y_axis = boardService.transformIntoStruct($scope.y_axis, _nextYStruct);
+            $scope.board.x_axis = axis.transformIntoStruct($scope.x_axis, _nextXStruct);
+            $scope.board.y_axis = axis.transformIntoStruct($scope.y_axis, _nextYStruct);
 
             _watch();
         }
@@ -36,22 +36,22 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
 
     var _watch = function () {
         $scope.$watchCollection("x_axis", function (newValue, oldValue) {
-            boardService.update(newValue, oldValue, $scope.board.x_axis, _nextXStruct);
+            axis.update(newValue, oldValue, $scope.board.x_axis, _nextXStruct);
         });
         $scope.$watchCollection("y_axis", function (newValue, oldValue) {
-            boardService.update(newValue, oldValue, $scope.board.y_axis, _nextYStruct);
+            axis.update(newValue, oldValue, $scope.board.y_axis, _nextYStruct);
         });
     };
 
     var _nextXStruct = function (val) {
-        return boardService.createStruct(val, function() {
+        return axis.createStruct(val, function() {
             $scope.board.x_axis_id_seq++;
             return $scope.board.x_axis_id_seq;
         });
     };
 
     var _nextYStruct = function (val) {
-        return boardService.createStruct(val, function () {
+        return axis.createStruct(val, function () {
             $scope.board.y_axis_id_seq++;
             return $scope.board.y_axis_id_seq;
         });

@@ -1,7 +1,7 @@
 // TODO add support for undefined (all removed, all added)
-// TODO this should be a axis structure object, learn how to define one
+// TODO this should be a real object with methods, learn how to define one
 // TODO most probably I do not need old value array for calculations
-app.factory('boardService', function () {
+app.factory('axis', function () {
         return {
 
             update: function (newValue, oldValue, axis, createStructFn) {
