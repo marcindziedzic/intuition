@@ -29,7 +29,7 @@
             <tr>
                 <th>#</th>
                 <th ng-repeat="x in board.x_axis"
-                    ng-style="{ 'background-color': x == current_day ? '#FFFFCC' : ''}">{{x.val}}</th>
+                    ng-style="{ 'background-color': x.val == current_day ? '#FFFFCC' : ''}">{{x.val}}</th>
             </tr>
             <tr ng-repeat="y in board.y_axis">
 
