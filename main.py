@@ -17,7 +17,6 @@ else:
     debug = True
 
 settings = {
-    "static_path": os.path.join(os.path.dirname(__file__), "static"),
     "debug": debug,
     "db": db
 }
