@@ -7,14 +7,22 @@ from tornado import gen
 from intuition.utils import days_in_current_month
 
 
-class BoardsHandler(RequestHandler):
+class MongoAwareRequestHandler(RequestHandler):
+
+    def prepare(self):
+        self.db = self.settings['db']
+
+    def get_id_as_mongo_object(self, arg='id'):
+        return ObjectId(self.get_argument(arg))
+
+
+class BoardsHandler(MongoAwareRequestHandler):
 
     @gen.coroutine
     def get(self, *args, **kwargs):
-        db = self.settings['db']
         user_id = self.get_argument('user_id')
 
-        cursor = db.boards.find({'user_id': user_id}, {'_id': 1, 'name': 1})
+        cursor = self.db.boards.find({'user_id': user_id}, {'_id': 1, 'name': 1})
 
         boards = []
         while (yield cursor.fetch_next):
@@ -25,15 +33,13 @@ class BoardsHandler(RequestHandler):
         self.write({'boards': boards})
 
 
-class BoardHandler(RequestHandler):
+class BoardHandler(MongoAwareRequestHandler):
 
     @gen.coroutine
     def get(self, *args, **kwargs):
-        db = self.settings['db']
-        board_id = self.get_argument('id')
-        board = yield db.boards.find_one(ObjectId(board_id))
+        board_id = self.get_id_as_mongo_object()
+        board = yield self.db.boards.find_one(board_id)
         board['_id'] = str(board['_id'])
-        self.set_header('Content-Type', 'application/javascript')
         self.write(board)
 
     @gen.coroutine
@@ -43,15 +49,13 @@ class BoardHandler(RequestHandler):
         if board.get('_id'):
             board['_id'] = ObjectId(board['_id'])
 
-        db = self.settings['db']
-        board_id = yield db.boards.save(board)
+        board_id = yield self.db.boards.save(board)
         self.write({'id': str(board_id)})
 
     @gen.coroutine
     def delete(self, *args, **kwargs):
-        board_id = ObjectId(self.get_argument('id'))
-        db = self.settings['db']
-        result = yield db.boards.remove({"_id": board_id})
+        board_id = self.get_id_as_mongo_object()
+        result = yield self.db.boards.remove({"_id": board_id})
         self.write(result)
 
 
