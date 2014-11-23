@@ -44,6 +44,19 @@
             </tr>
         </table>
         <button ng-disabled="boardManagement.$invalid" ng-click="save(board)">Submit</button>
+        <button ng-disabled="!board._id" ng-click="delete(board)">Delete</button>
+
+        <!-- template used to confirm deletion -->
+        <script type="text/ng-template" id="boardRemoval.html">
+            <div class="modal-header">
+                <h3 class="modal-title">Are you sure you want to delete '{{board.name}}'!</h3>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" ng-click="ok()">OK</button>
+                <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
+            </div>
+        </script>
+
     </div>
 
 </form>

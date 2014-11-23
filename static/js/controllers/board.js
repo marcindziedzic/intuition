@@ -1,4 +1,4 @@
-app.controller('BoardController', function ($scope, $http, $routeParams, $sessionStorage, axis) {
+app.controller('BoardController', function ($scope, $http, $routeParams, $sessionStorage, $modal, axis) {
 
     var colorScheme = [];
 
@@ -163,6 +163,35 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
         $http.post('/board', board).success(function(data) {
             board._id = data.id;
         });
-    }
+    };
 
+    $scope.delete = function (board) {
+        var modalInstance = $modal.open({
+            templateUrl: 'boardRemoval.html',
+            controller: 'BoardRemovalController',
+            size: 'lg',
+            resolve: {
+                board: function () {
+                    return board;
+                }
+            }
+        });
+    };
+
+});
+
+app.controller('BoardRemovalController', function ($scope, $modalInstance, $http, $location, board) {
+
+    $scope.board = board;
+
+    $scope.ok = function () {
+        $http.delete('/board?id=' + board._id).success(function (data) {
+            $modalInstance.close();
+            $location.path('/dashboard');
+        });
+    };
+
+    $scope.cancel = function () {
+        $modalInstance.dismiss('cancel');
+    };
 });

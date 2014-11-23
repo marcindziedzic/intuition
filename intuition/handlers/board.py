@@ -1,5 +1,4 @@
 import json
-import pymongo
 
 from bson.objectid import ObjectId
 from tornado.web import RequestHandler
@@ -47,6 +46,13 @@ class BoardHandler(RequestHandler):
         db = self.settings['db']
         board_id = yield db.boards.save(board)
         self.write({'id': str(board_id)})
+
+    @gen.coroutine
+    def delete(self, *args, **kwargs):
+        board_id = ObjectId(self.get_argument('id'))
+        db = self.settings['db']
+        result = yield db.boards.remove({"_id": board_id})
+        self.write(result)
 
 
 class BoardDefaultsHandler(RequestHandler):
