@@ -32,6 +32,12 @@ class BoardsHandler(MongoAwareRequestHandler):
 
         self.write({'boards': boards})
 
+    @gen.coroutine
+    def delete(self, *args, **kwargs):
+        user_id = self.get_argument('user_id')
+        result = yield self.db.boards.remove({'user_id': user_id})
+        self.write(result)
+
 
 class BoardHandler(MongoAwareRequestHandler):
 

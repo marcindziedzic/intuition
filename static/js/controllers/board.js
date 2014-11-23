@@ -166,32 +166,24 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
     };
 
     $scope.delete = function (board) {
-        var modalInstance = $modal.open({
-            templateUrl: 'boardRemoval.html',
-            controller: 'BoardRemovalController',
-            size: 'lg',
-            resolve: {
-                board: function () {
-                    return board;
-                }
+        createModalWindow($modal,
+            {
+                controller: 'BoardRemovalController',
+                notificationText: "Are you sure you want to delete '" + board.name + "'!",
+                param: board
             }
-        });
+        );
     };
 
 });
 
-app.controller('BoardRemovalController', function ($scope, $modalInstance, $http, $location, board) {
-
-    $scope.board = board;
+app.controller('BoardRemovalController', function ($scope, $modalInstance, $http, $location, param, notificationText) {
+    BaseModalController($scope, $modalInstance, notificationText);
 
     $scope.ok = function () {
-        $http.delete('/board?id=' + board._id).success(function (data) {
+        $http.delete('/board?id=' + param._id).success(function (data) {
             $modalInstance.close();
             $location.path('/dashboard');
         });
-    };
-
-    $scope.cancel = function () {
-        $modalInstance.dismiss('cancel');
     };
 });
