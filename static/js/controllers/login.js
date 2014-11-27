@@ -37,6 +37,9 @@ app.controller('LoginController', function ($scope, $location, $sessionStorage) 
         $sessionStorage.userId = userInfo.id;
         $sessionStorage.displayName = userInfo.displayName;
 
+        $scope.$emit('user:loggedIn',
+            {userId: userInfo.id, displayName: userInfo.displayName});
+
         $scope.$apply(function() { $location.path('/dashboard/'); });
     };
 
