@@ -1,13 +1,12 @@
 app.controller('BoardController', function ($scope, $http, $routeParams, $sessionStorage, $modal, axis) {
 
-    var colorScheme = [];
     var commentsSupport = new CommentsSupport();
+    var colorsSupport = new ColorsSupport();
 
-    $http.get('/defaults').success(function(data) {
-        $scope.board_types = data.board_types;
-        $scope.days_in_current_month = data.days_in_current_month;
-        $scope.current_day = data.current_day;
-        colorScheme = data.color_scheme;
+    $http.get('/defaults').success(function(defaults) {
+        $scope.board_types = defaults.board_types;
+        $scope.days_in_current_month = defaults.days_in_current_month;
+        $scope.current_day = defaults.current_day;
 
         if ($routeParams.id) {
             $http.get('/board?id=' + $routeParams.id).success(function (data) {
@@ -16,6 +15,7 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
                 $scope.x_axis = axis.transformIntoArray($scope.board.x_axis);
                 $scope.y_axis = axis.transformIntoArray($scope.board.y_axis);
 
+                colorsSupport.init(defaults.color_scheme, $scope.board.cells);
                 commentsSupport.init($scope.board.cells);
 
                 _watch();
@@ -32,6 +32,8 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
 
             $scope.board.x_axis = axis.transformIntoStruct($scope.x_axis, _nextXStruct);
             $scope.board.y_axis = axis.transformIntoStruct($scope.y_axis, _nextYStruct);
+
+            colorsSupport.init(defaults.color_scheme, $scope.board.cells);
 
             _watch();
         }
@@ -60,79 +62,22 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
         });
     };
 
-    $scope.getCellClasses = function (x, y) {
-        var cell = _getCellFromBoard($scope.board.cells, x, y);
-        if (cell != null) {
-            return cell.val;
-        }
-        return 'neutral';
-    };
+    $scope.getCellClasses = colorsSupport.getOr;
 
     $scope.toggleColor = function(event) {
-        _toggleColor(event.target.id);
-    };
+        var elementId = event.target.id;
 
-    var _getNewColorClass = function(currentColorClass, newColorClass) {
-        if(typeof newColorClass !== typeof undefined) {
-            var newClass = newColorClass;
-        } else {
-            var currentColorClassIndex = _.indexOf(colorScheme, currentColorClass);
-            var nextColorClassIndex = currentColorClassIndex + 1;
-            if (colorScheme.length == nextColorClassIndex) {
-                nextColorClassIndex = 0;
-            }
-            var newClass = colorScheme[nextColorClassIndex];
-        }
+        var xy = elementId.split('_');
+        var x = xy[0];
+        var y = xy[1];
 
-        return newClass;
-    };
-
-    var _toggleColor = function(elementId, newColor) {
-        var currentColorClass = _getCurrentColorClass(elementId);
-        var newColorClass = _getNewColorClass(currentColorClass, newColor);
+        var currentColorClass = colorsSupport.getOr(x, y);
+        colorsSupport.update(elementId, currentColorClass);
+        var newColorClass = colorsSupport.getOr(x, y);
 
         var el = document.getElementById(elementId);
         el.classList.remove(currentColorClass);
         el.classList.add(newColorClass);
-    };
-
-    var _getCurrentColorClass = function(element_id) {
-        var el = document.getElementById(element_id);
-        if (el == null) {
-            return null;
-        }
-        return _getCurrentColorClassFromElement(el);
-    };
-
-    var _getCurrentColorClassFromElement = function (el) {
-        var classes = el.classList;
-        for (var i = 0; i < classes.length; i++) {
-            var colorClass = classes[i];
-
-            var _index_of = _.indexOf(colorScheme, colorClass);
-            if (_index_of > -1) {
-                return colorClass;
-            }
-        }
-        return null;
-    };
-
-    var _getCellFromBoard = function(cells, x, y) {
-        var idx = _getIndexOfCellInBoard(cells, x, y);
-        if (idx > -1) {
-            return cells[idx];
-        }
-        return null;
-    };
-
-    var _getIndexOfCellInBoard = function (cells, x, y) {
-        for (var i = 0; i < cells.length; i++) {
-            var cell = cells[i];
-            if (cell.x == x && cell.y == y) {
-                return i;
-            }
-        }
-        return -1;
     };
 
     var _readCells = function() {
@@ -140,19 +85,19 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
 
         var _cells = [];
         angular.forEach(cells, function (cell, _) {
-            var current_color = _getCurrentColorClass(cell.id);
+            var xy = cell.id.split('_');
+            var x = xy[0];
+            var y = xy[1];
+
+            var current_color = colorsSupport.getOr(x, y);
 
             if (current_color != 'neutral') {
-                var xy = cell.id.split('_');
-                var x = xy[0];
-                var y = xy[1];
-
                 var _cell = {
                     'x': parseInt(x),
-                    'y': parseInt(y),
-                    'val': current_color
+                    'y': parseInt(y)
                 };
 
+                colorsSupport.create(_cell);
                 commentsSupport.create(_cell);
 
                 _cells.push(_cell);
@@ -210,6 +155,52 @@ app.controller('BoardRemovalController', function ($scope, $modalInstance, $http
     };
 });
 
+function ColorsSupport() {
+
+    var colorScheme = [];
+    var colorsStore = {};
+
+    return {
+
+        init: function(_colorScheme, cells) {
+            colorScheme = _colorScheme;
+
+            angular.forEach(cells, function (cell, _) {
+                colorsStore[cell.x + "_" + cell.y] = cell.val;
+            });
+        },
+
+        create: function (cell) {
+            var id = cell.x + '_' + cell.y;
+            var color = colorsStore[id];
+            if (!_.isUndefined(color)) {
+                cell['val'] = color;
+            }
+        },
+
+        getOr: function(x, y) {
+            var id = x + '_' + y;
+            var color = colorsStore[id];
+            if (typeof color === typeof undefined) {
+                return 'neutral';
+            }
+            return color;
+        },
+
+        update: function (id, currentColor) {
+            var currentColorIndex = _.indexOf(colorScheme, currentColor);
+            var nextColorIndex = currentColorIndex + 1;
+            if (colorScheme.length == nextColorIndex) {
+                nextColorIndex = 0;
+            }
+            var newClass = colorScheme[nextColorIndex];
+            colorsStore[id] = newClass;
+        }
+
+    };
+
+}
+
 function CommentsSupport() {
 
     var commentsStore = {};
@@ -225,7 +216,8 @@ function CommentsSupport() {
         },
 
         create: function (cell) {
-            var comment = this.getOrUndefined(cell.x, cell.y);
+            var id = cell.x + '_' + cell.y;
+            var comment = commentsStore[id];
             if (!_.isUndefined(comment)) {
                 cell['comment'] = comment;
             }
