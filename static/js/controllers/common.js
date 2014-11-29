@@ -1,21 +1,35 @@
 // modal windows support
-function BaseModalController($scope, $modalInstance, notificationText) {
-    $scope.notificationText = notificationText;
+function BaseModalController($scope, $modalInstance, params) {
+    $scope.notificationText = params['notificationText'];
 
     $scope.cancel = function () {
         $modalInstance.dismiss();
     };
 }
 
-function createModalWindow($modal, params) {
-    var resolve = {
-        notificationText: function () {
-            return params['notificationText'];
-        },
-        param: function () {
-            return params['param'];
-        }
+app.controller('SingleInputFieldModalController', function ($scope, $modalInstance, params) {
+    BaseModalController($scope, $modalInstance, params);
+
+    $scope.showInputField = params['showInputField'];
+    $scope.inputFieldText = params['inputFieldText'];
+
+    $scope.ok = function () {
+        $modalInstance.close($scope.inputFieldText);
     };
+});
+
+function createModalWindow($modal, params) {
+    var resolveParams = {};
+    for (var key in params) {
+        if (key == 'onSuccess' || key == 'controller') {
+            continue;
+        }
+        resolveParams[key] = params[key];
+    }
+
+    var resolve = { params: function () {
+        return resolveParams;
+    }};
 
     var modalInstance = $modal.open({
         templateUrl: 'yesNoModalTemplate.html',
@@ -29,3 +43,16 @@ function createModalWindow($modal, params) {
         modalInstance.result.then(onSuccess);
     }
 }
+
+// directives http://jsfiddle.net/bcaudan/vTZZ5/
+app.directive('ngRightClick', function($parse) {
+    return function(scope, element, attrs) {
+        var fn = $parse(attrs.ngRightClick);
+        element.bind('contextmenu', function(event) {
+            scope.$apply(function() {
+                event.preventDefault();
+                fn(scope, {$event:event});
+            });
+        });
+    };
+});

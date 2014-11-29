@@ -1,6 +1,7 @@
 app.controller('BoardController', function ($scope, $http, $routeParams, $sessionStorage, $modal, axis) {
 
     var colorScheme = [];
+    var commentsStore = {};
 
     $http.get('/defaults').success(function(data) {
         $scope.board_types = data.board_types;
@@ -14,6 +15,12 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
 
                 $scope.x_axis = axis.transformIntoArray($scope.board.x_axis);
                 $scope.y_axis = axis.transformIntoArray($scope.board.y_axis);
+
+                angular.forEach($scope.board.cells, function(cell, _) {
+                    if (!(typeof cell.comment === "undefined")) {
+                        commentsStore[cell.x + "_" + cell.y] = cell.comment;
+                    }
+                });
 
                 _watch();
             });
@@ -147,7 +154,8 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
                 var _cell = {
                     'x': parseInt(x),
                     'y': parseInt(y),
-                    'val': current_color
+                    'val': current_color,
+                    'comment': commentsStore[cell.id]
                 };
 
                 _cells.push(_cell);
@@ -170,18 +178,45 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
             {
                 controller: 'BoardRemovalController',
                 notificationText: "Are you sure you want to delete '" + board.name + "'!",
-                param: board
+                board: board
             }
         );
     };
 
+    $scope.getComment = function(x, y) {
+        var id = x + '_' + y;
+        return commentsStore[id];
+    };
+
+    $scope.addComment = function(event) {
+        var currentComment = commentsStore[event.target.id];
+        if (_.isUndefined(currentComment)) {
+            currentComment = null;
+        }
+
+        createModalWindow($modal,
+            {
+                controller: 'SingleInputFieldModalController',
+                notificationText: "Add a comment",
+                showInputField: true,
+                inputFieldText: currentComment,
+                onSuccess: function (comment) {
+                    if (_.isString(comment)) {
+                        commentsStore[event.target.id] = comment;
+                    } else {
+                        delete commentsStore[event.target.id];
+                    }
+                }
+            }
+        );
+    };
 });
 
-app.controller('BoardRemovalController', function ($scope, $modalInstance, $http, $location, param, notificationText) {
-    BaseModalController($scope, $modalInstance, notificationText);
+app.controller('BoardRemovalController', function ($scope, $modalInstance, $http, $location, params) {
+    BaseModalController($scope, $modalInstance, params);
 
     $scope.ok = function () {
-        $http.delete('/board?id=' + param._id).success(function (data) {
+        $http.delete('/board?id=' + params['board']._id).success(function (data) {
             $modalInstance.close();
             $location.path('/dashboard');
         });

@@ -38,7 +38,10 @@
                     ng-repeat="x in board.x_axis"
                     ng-class="getCellClasses({{x.id}},{{y.id}})"
                     ng-click="toggleColor($event)"
-                        data-cell="true"
+                    ng-right-click="addComment($event)"
+                    tooltip="{{getComment(x.id,y.id)}}"
+                    tooltip-append-to-body="true"
+                    data-cell="true"
                         >
                 </td>
             </tr>

@@ -9,7 +9,7 @@ app.controller('DashboardController', function ($scope, $http, $sessionStorage, 
             {
                 controller: 'BoardsRemovalController',
                 notificationText: "Are you sure you want to delete all boards! This can't be undone!",
-                param: $sessionStorage.userId,
+                userId: $sessionStorage.userId,
                 onSuccess: function () {
                     $scope.boards = [];
                 }
@@ -19,11 +19,11 @@ app.controller('DashboardController', function ($scope, $http, $sessionStorage, 
 
 });
 
-app.controller('BoardsRemovalController', function ($scope, $modalInstance, $http, $location, param, notificationText) {
-    BaseModalController($scope, $modalInstance, notificationText);
+app.controller('BoardsRemovalController', function ($scope, $modalInstance, $http, $location, params) {
+    BaseModalController($scope, $modalInstance, params);
 
     $scope.ok = function () {
-        $http.delete('/boards?user_id=' + param).success(function (data) {
+        $http.delete('/boards?user_id=' + params['userId']).success(function (data) {
             $modalInstance.close();
         });
     };
