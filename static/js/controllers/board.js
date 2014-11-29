@@ -1,7 +1,7 @@
 app.controller('BoardController', function ($scope, $http, $routeParams, $sessionStorage, $modal, axis) {
 
     var colorScheme = [];
-    var commentsStore = {};
+    var commentsSupport = new CommentsSupport();
 
     $http.get('/defaults').success(function(data) {
         $scope.board_types = data.board_types;
@@ -16,11 +16,7 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
                 $scope.x_axis = axis.transformIntoArray($scope.board.x_axis);
                 $scope.y_axis = axis.transformIntoArray($scope.board.y_axis);
 
-                angular.forEach($scope.board.cells, function(cell, _) {
-                    if (!(typeof cell.comment === "undefined")) {
-                        commentsStore[cell.x + "_" + cell.y] = cell.comment;
-                    }
-                });
+                commentsSupport.init($scope.board.cells);
 
                 _watch();
             });
@@ -154,9 +150,10 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
                 var _cell = {
                     'x': parseInt(x),
                     'y': parseInt(y),
-                    'val': current_color,
-                    'comment': commentsStore[cell.id]
+                    'val': current_color
                 };
+
+                commentsSupport.create(_cell);
 
                 _cells.push(_cell);
             }
@@ -183,16 +180,10 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
         );
     };
 
-    $scope.getComment = function(x, y) {
-        var id = x + '_' + y;
-        return commentsStore[id];
-    };
+    $scope.getComment = commentsSupport.getOrUndefined;
 
     $scope.addComment = function(event) {
-        var currentComment = commentsStore[event.target.id];
-        if (_.isUndefined(currentComment)) {
-            currentComment = null;
-        }
+        var currentComment = commentsSupport.getOrNull(event.target.id);
 
         createModalWindow($modal,
             {
@@ -201,11 +192,7 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
                 showInputField: true,
                 inputFieldText: currentComment,
                 onSuccess: function (comment) {
-                    if (_.isString(comment)) {
-                        commentsStore[event.target.id] = comment;
-                    } else {
-                        delete commentsStore[event.target.id];
-                    }
+                    commentsSupport.update(event.target.id, comment);
                 }
             }
         );
@@ -222,3 +209,48 @@ app.controller('BoardRemovalController', function ($scope, $modalInstance, $http
         });
     };
 });
+
+function CommentsSupport() {
+
+    var commentsStore = {};
+
+    return {
+
+        init: function(cells) {
+            angular.forEach(cells, function (cell, _) {
+                if (!(typeof cell.comment === "undefined")) {
+                    commentsStore[cell.x + "_" + cell.y] = cell.comment;
+                }
+            });
+        },
+
+        create: function (cell) {
+            var comment = this.getOrUndefined(cell.x, cell.y);
+            if (!_.isUndefined(comment)) {
+                cell['comment'] = comment;
+            }
+        },
+
+        getOrUndefined: function (x, y) {
+            var id = x + '_' + y;
+            return commentsStore[id];
+        },
+
+        getOrNull: function (id) {
+            var comment = commentsStore[id];
+            if (_.isUndefined(comment)) {
+                return null;
+            }
+            return comment;
+        },
+
+        update: function (id, comment) {
+            if (!_.isEmpty(comment) && _.isString(comment)) {
+                commentsStore[id] = comment;
+            } else {
+                delete commentsStore[id];
+            }
+        }
+
+    };
+}
