@@ -1,7 +1,7 @@
 app.controller('BoardController', function ($scope, $http, $routeParams, $sessionStorage, $modal, axis) {
 
     var comments = new CommentsSupport();
-    var colorsSupport = new ColorsSupport();
+    var colors = new ColorsSupport();
 
     $http.get('/defaults').success(function(defaults) {
         $scope.board_types = defaults.board_types;
@@ -15,7 +15,7 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
                 $scope.x_axis = axis.transformIntoArray($scope.board.x_axis);
                 $scope.y_axis = axis.transformIntoArray($scope.board.y_axis);
 
-                colorsSupport.init(defaults.color_scheme, $scope.board.cells);
+                colors.init(defaults.color_scheme, $scope.board.cells);
                 comments.init($scope.board.cells);
 
                 _watch();
@@ -33,7 +33,7 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
             $scope.board.x_axis = axis.transformIntoStruct($scope.x_axis, _nextXStruct);
             $scope.board.y_axis = axis.transformIntoStruct($scope.y_axis, _nextYStruct);
 
-            colorsSupport.init(defaults.color_scheme, $scope.board.cells);
+            colors.init(defaults.color_scheme, $scope.board.cells);
 
             _watch();
         }
@@ -62,14 +62,14 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
         });
     };
 
-    $scope.getCellClasses = colorsSupport.getByCords;
+    $scope.getCellClasses = colors.getByCords;
 
     $scope.toggleColor = function(event) {
         var elementId = event.target.id;
 
-        var currentColorClass = colorsSupport.getById(elementId);
-        colorsSupport.update(elementId, currentColorClass);
-        var newColorClass = colorsSupport.getById(elementId);
+        var currentColorClass = colors.getById(elementId);
+        colors.update(elementId, currentColorClass);
+        var newColorClass = colors.getById(elementId);
 
         var el = document.getElementById(elementId);
         el.classList.remove(currentColorClass);
@@ -85,7 +85,7 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
             var x = xy[0];
             var y = xy[1];
 
-            var current_color = colorsSupport.getByCords(x, y);
+            var current_color = colors.getByCords(x, y);
 
             if (current_color != 'neutral') {
                 var _cell = {
@@ -93,7 +93,7 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
                     'y': parseInt(y)
                 };
 
-                colorsSupport.create(_cell);
+                colors.extend(_cell);
                 comments.extend(_cell);
 
                 _cells.push(_cell);
@@ -150,55 +150,3 @@ app.controller('BoardRemovalController', function ($scope, $modalInstance, $http
         });
     };
 });
-
-function ColorsSupport() {
-
-    var colorScheme = [];
-    var colorsStore = {};
-
-    function get(id) {
-        var color = colorsStore[id];
-        if (typeof color === typeof undefined) {
-            return 'neutral';
-        }
-        return color;
-    }
-
-    return {
-
-        init: function(_colorScheme, cells) {
-            colorScheme = _colorScheme;
-
-            angular.forEach(cells, function (cell, _) {
-                colorsStore[cell.x + "_" + cell.y] = cell.val;
-            });
-        },
-
-        create: function (cell) {
-            var id = cell.x + '_' + cell.y;
-            var color = colorsStore[id];
-            if (!_.isUndefined(color)) {
-                cell['val'] = color;
-            }
-        },
-
-        getByCords: function(x, y) {
-            var id = x + '_' + y;
-            return get(id);
-        },
-
-        getById: get,
-
-        update: function (id, currentColor) {
-            var currentColorIndex = _.indexOf(colorScheme, currentColor);
-            var nextColorIndex = currentColorIndex + 1;
-            if (colorScheme.length == nextColorIndex) {
-                nextColorIndex = 0;
-            }
-            var newClass = colorScheme[nextColorIndex];
-            colorsStore[id] = newClass;
-        }
-
-    };
-
-}
