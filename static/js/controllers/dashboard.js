@@ -19,7 +19,7 @@ app.controller('DashboardController', function ($scope, $http, $sessionStorage, 
 
 });
 
-app.controller('BoardsRemovalController', function ($scope, $modalInstance, $http, $location, params) {
+app.controller('BoardsRemovalController', function ($scope, $modalInstance, $http, params) {
     BaseModalController($scope, $modalInstance, params);
 
     $scope.ok = function () {

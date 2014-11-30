@@ -1,11 +1,10 @@
-app.controller('BoardController', function ($scope, $http, $routeParams, $sessionStorage, $modal, axis) {
+app.controller('BoardController', function ($scope, $http, $routeParams, $sessionStorage, $modal, $location, axis) {
 
     var comments = new CommentsSupport();
     var colors = new ColorsSupport();
 
     $http.get('/defaults').success(function(defaults) {
-        $scope.board_types = defaults.board_types;
-        $scope.days_in_current_month = defaults.days_in_current_month;
+        $scope.board_templates = defaults.board_templates;
         $scope.current_day = defaults.current_day;
 
         if ($routeParams.id) {
@@ -21,7 +20,7 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
                 _watch();
             });
         } else {
-            $scope.x_axis = _.range(1, $scope.days_in_current_month + 1);
+            $scope.x_axis = _.range(1, defaults.days_in_current_month + 1);
             $scope.y_axis = ['comma','separated','list','of','activities'];
 
             $scope.board = { };
@@ -108,6 +107,7 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
 
         $http.post('/board', board).success(function(data) {
             board._id = data.id;
+            $location.path("/boards/" + data.id);
         });
     };
 

@@ -82,7 +82,7 @@ class BoardDefaultsHandler(RequestHandler):
             'great_failure']
 
         d = {
-            'board_types': ['calendar'],
+            'board_templates': ['calendar'],
             'color_scheme': color_scheme,
             'days_in_current_month': days_in_current_month(),
             'current_day': current_day,

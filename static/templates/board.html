@@ -1,28 +1,24 @@
 <form name="boardManagement">
 
-    <p>Days in current month {{days_in_current_month}}</p>
-    <p>Board id <strong>{{board._id}}</strong></p>
-
-    <label for="board_user_id">User id:</label>
-    <span><strong>{{board.user_id}}</strong></span>
-    <br/>
-
-    <label for="board_type">Board type:</label>
-    <select ng-model="board.type" ng-options="type for type in board_types">
-      <option value="">-- choose board type --</option>
-    </select>
+    <div ng-if="board._id === undefined">
+        <label for="board_template">Select board template:</label>
+        <select ng-model="board.type" ng-options="template for template in board_templates">
+            <option value="">-- none --</option>
+        </select>
+    </div>
 
     <div ng-show="board.type == 'calendar'">
+
         <label for="board_name">Board name:</label>
-        <input type="text" ng-model="board.name" ng-required="true" />
+        <input id="board_name" type="text" ng-model="board.name" class="form-control" ng-required="true" />
         <br/>
 
-        <label for="board_xaxis">Board xaxis</label>
-        <input type="text" ng-model="x_axis" ng-list ng-required="true"/>
+        <label for="board_xaxis">Board xaxis:</label>
+        <input id="board_xaxis" type="text" ng-model="x_axis" class="form-control" ng-list ng-required="true"/>
         <br/>
 
-        <label for="board_yaxis">Board yaxis</label>
-        <input type="text" ng-model="y_axis" ng-list ng-required="true"/>
+        <label for="board_yaxis">Board yaxis:</label>
+        <input id="board_yaxis" type="text" ng-model="y_axis" class="form-control" ng-list ng-required="true"/>
         <br/>
 
         <table class="table table-bordered">
