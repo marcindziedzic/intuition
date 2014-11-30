@@ -25,6 +25,12 @@
         <input id="board_yaxis" type="text" ng-model="y_axis" class="form-control" ng-list ng-required="true"/>
         <br/>
 
+        <div class="checkbox" ng-if="board._id !== undefined">
+            <label>
+                <input type="checkbox" ng-model="board.archived" /> Is this board archived?
+            </label>
+        </div>
+
         <table class="table table-bordered">
             <tr>
                 <th>#</th>

@@ -22,7 +22,8 @@ class BoardsHandler(MongoAwareRequestHandler):
     def get(self, *args, **kwargs):
         user_id = self.get_argument('user_id')
 
-        cursor = self.db.boards.find({'user_id': user_id}, {'_id': 1, 'name': 1})
+        projection = {'_id': 1, 'name': 1, 'archived': 1}
+        cursor = self.db.boards.find({'user_id': user_id}, projection)
 
         boards = []
         while (yield cursor.fetch_next):

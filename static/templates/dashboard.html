@@ -1,11 +1,18 @@
 <section>
     <p>Use one of your existing boards</p>
     <ul>
-        <li ng-repeat="board in boards"><a ng-href="#/boards/{{board._id}}">{{board.name}}</a>
+        <li ng-repeat="board in boards | filter:{archived:'!true'}"><a ng-href="#/boards/{{board._id}}">{{board.name}}</a>
+        </li>
+    </ul>
+    <span><a href="#/boards">Create</a> a new one</span>
+</section>
+<section>
+    <p>Or just browse those marked as archived</p>
+    <ul>
+        <li ng-repeat="board in boards | filter:{archived:'true'}"><a ng-href="#/boards/{{board._id}}">{{board.name}}</a>
         </li>
     </ul>
 </section>
 <section>
-    <span>or <a href="#/boards">create</a> a new one</span>
     <button ng-disabled="boards.length == 0" ng-click="delete()">Delete all boards</button>
 </section>
