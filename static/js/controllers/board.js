@@ -62,18 +62,14 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
         });
     };
 
-    $scope.getCellClasses = colorsSupport.getOr;
+    $scope.getCellClasses = colorsSupport.getByCords;
 
     $scope.toggleColor = function(event) {
         var elementId = event.target.id;
 
-        var xy = elementId.split('_');
-        var x = xy[0];
-        var y = xy[1];
-
-        var currentColorClass = colorsSupport.getOr(x, y);
+        var currentColorClass = colorsSupport.getById(elementId);
         colorsSupport.update(elementId, currentColorClass);
-        var newColorClass = colorsSupport.getOr(x, y);
+        var newColorClass = colorsSupport.getById(elementId);
 
         var el = document.getElementById(elementId);
         el.classList.remove(currentColorClass);
@@ -89,7 +85,7 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
             var x = xy[0];
             var y = xy[1];
 
-            var current_color = colorsSupport.getOr(x, y);
+            var current_color = colorsSupport.getByCords(x, y);
 
             if (current_color != 'neutral') {
                 var _cell = {
@@ -125,10 +121,10 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
         );
     };
 
-    $scope.getComment = commentsSupport.getOrUndefined;
+    $scope.getComment = commentsSupport.getByCords;
 
     $scope.addComment = function(event) {
-        var currentComment = commentsSupport.getOrNull(event.target.id);
+        var currentComment = commentsSupport.getById(event.target.id);
 
         createModalWindow($modal,
             {
@@ -160,6 +156,14 @@ function ColorsSupport() {
     var colorScheme = [];
     var colorsStore = {};
 
+    function get(id) {
+        var color = colorsStore[id];
+        if (typeof color === typeof undefined) {
+            return 'neutral';
+        }
+        return color;
+    }
+
     return {
 
         init: function(_colorScheme, cells) {
@@ -178,14 +182,12 @@ function ColorsSupport() {
             }
         },
 
-        getOr: function(x, y) {
+        getByCords: function(x, y) {
             var id = x + '_' + y;
-            var color = colorsStore[id];
-            if (typeof color === typeof undefined) {
-                return 'neutral';
-            }
-            return color;
+            return get(id);
         },
+
+        getById: get,
 
         update: function (id, currentColor) {
             var currentColorIndex = _.indexOf(colorScheme, currentColor);
@@ -223,12 +225,12 @@ function CommentsSupport() {
             }
         },
 
-        getOrUndefined: function (x, y) {
+        getByCords: function (x, y) {
             var id = x + '_' + y;
             return commentsStore[id];
         },
 
-        getOrNull: function (id) {
+        getById: function (id) {
             var comment = commentsStore[id];
             if (_.isUndefined(comment)) {
                 return null;
