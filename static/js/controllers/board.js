@@ -1,6 +1,6 @@
 app.controller('BoardController', function ($scope, $http, $routeParams, $sessionStorage, $modal, axis) {
 
-    var commentsSupport = new CommentsSupport();
+    var comments = new CommentsSupport();
     var colorsSupport = new ColorsSupport();
 
     $http.get('/defaults').success(function(defaults) {
@@ -16,7 +16,7 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
                 $scope.y_axis = axis.transformIntoArray($scope.board.y_axis);
 
                 colorsSupport.init(defaults.color_scheme, $scope.board.cells);
-                commentsSupport.init($scope.board.cells);
+                comments.init($scope.board.cells);
 
                 _watch();
             });
@@ -94,7 +94,7 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
                 };
 
                 colorsSupport.create(_cell);
-                commentsSupport.create(_cell);
+                comments.extend(_cell);
 
                 _cells.push(_cell);
             }
@@ -121,10 +121,10 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
         );
     };
 
-    $scope.getComment = commentsSupport.getByCords;
+    $scope.getComment = comments.getByCords;
 
     $scope.addComment = function(event) {
-        var currentComment = commentsSupport.getById(event.target.id);
+        var currentComment = comments.getById(event.target.id);
 
         createModalWindow($modal,
             {
@@ -133,7 +133,7 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
                 showInputField: true,
                 inputFieldText: currentComment,
                 onSuccess: function (comment) {
-                    commentsSupport.update(event.target.id, comment);
+                    comments.update(event.target.id, comment);
                 }
             }
         );
@@ -201,50 +201,4 @@ function ColorsSupport() {
 
     };
 
-}
-
-function CommentsSupport() {
-
-    var commentsStore = {};
-
-    return {
-
-        init: function(cells) {
-            angular.forEach(cells, function (cell, _) {
-                if (!(typeof cell.comment === "undefined")) {
-                    commentsStore[cell.x + "_" + cell.y] = cell.comment;
-                }
-            });
-        },
-
-        create: function (cell) {
-            var id = cell.x + '_' + cell.y;
-            var comment = commentsStore[id];
-            if (!_.isUndefined(comment)) {
-                cell['comment'] = comment;
-            }
-        },
-
-        getByCords: function (x, y) {
-            var id = x + '_' + y;
-            return commentsStore[id];
-        },
-
-        getById: function (id) {
-            var comment = commentsStore[id];
-            if (_.isUndefined(comment)) {
-                return null;
-            }
-            return comment;
-        },
-
-        update: function (id, comment) {
-            if (!_.isEmpty(comment) && _.isString(comment)) {
-                commentsStore[id] = comment;
-            } else {
-                delete commentsStore[id];
-            }
-        }
-
-    };
 }
