@@ -7,6 +7,6 @@ routes = [
     url(r"/boards", h.BoardsHandler),
     url(r"/board", h.BoardHandler),
     url(r"/defaults", h.BoardDefaultsHandler),
-    url(r"/()$", StaticFileHandler, {'path': 'static/index.html'}),
+    url(r"/()$", StaticFileHandler, {'path': 'static/landing.html'}),
     url(r"/(.*)", StaticFileHandler, {'path': 'static/'}),
 ]
