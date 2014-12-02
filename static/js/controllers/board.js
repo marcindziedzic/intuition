@@ -1,4 +1,4 @@
-app.controller('BoardController', function ($scope, $http, $routeParams, $sessionStorage, $modal, $location, axis) {
+app.controller('BoardController', function ($scope, $http, $routeParams, $window, $modal, $location, axis) {
 
     var comments = new CommentsSupport();
     var colors = new ColorsSupport();
@@ -24,7 +24,7 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $sessio
             $scope.y_axis = ['comma','separated','list','of','activities'];
 
             $scope.board = { };
-            $scope.board.user_id = $sessionStorage.userId;
+            $scope.board.user_id = $window.sessionStorage.getItem('userId');
             $scope.board.x_axis_id_seq = 0;
             $scope.board.y_axis_id_seq = 0;
             $scope.board.cells = [];

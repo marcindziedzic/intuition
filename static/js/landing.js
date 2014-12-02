@@ -1,4 +1,6 @@
-app.controller('LoginController', function ($scope, $location, $sessionStorage) {
+var app = angular.module('landingPage', []);
+
+app.controller('LoginController', function ($scope, $location, $window) {
 
     $scope.signedIn = false;
 
@@ -8,18 +10,20 @@ app.controller('LoginController', function ($scope, $location, $sessionStorage) 
                 'callback': $scope.processAuth,
                 'clientid': '220398280197-nv48tci6flnmtkff9i7g4430kejce25v.apps.googleusercontent.com',
                 'scope': 'profile',
-                'cookiepolicy': 'single_host_origin'
+                'cookiepolicy': 'single_host_origin',
+                'cookie_policy': 'single_host_origin'
             }
         );
     };
 
     $scope.processAuth = function (authResult) {
-        if (authResult['access_token']) {
+        if (authResult['g-oauth-window'] && authResult['access_token']) {
+            gapi.auth.setToken(authResult);
             $scope.signedIn = true;
             _getUserInfo();
-        } else if (authResult['error']) {
+        } else {
+            gapi.auth.signOut();
             $scope.signedIn = false;
-            // do sth useful with error
         }
     };
 
@@ -34,13 +38,9 @@ app.controller('LoginController', function ($scope, $location, $sessionStorage) 
     };
 
     var _processUserInfo = function (userInfo) {
-        $sessionStorage.userId = userInfo.id;
-        $sessionStorage.displayName = userInfo.displayName;
-
-        $scope.$emit('user:loggedIn',
-            {userId: userInfo.id, displayName: userInfo.displayName});
-
-        $scope.$apply(function() { $location.path('/dashboard/'); });
+        $window.sessionStorage.setItem('userId', userInfo.id);
+        $window.sessionStorage.setItem('displayName', userInfo.displayName);
+        $window.location.replace("/index.html#/dashboard");
     };
 
     _renderSignInButton();

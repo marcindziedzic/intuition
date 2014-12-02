@@ -20,7 +20,6 @@ module.exports = function (config) {
             'https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular-mocks.js',
             'https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore.js',
             'https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.12.0/ui-bootstrap-tpls.min.js',
-            'static/libs/ngStorage/ngStorage.min.js',
             'static/js/app.js',
             'static/js/controllers/*.js',
             'static/js/services/*.js',

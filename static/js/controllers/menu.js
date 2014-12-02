@@ -1,19 +1,12 @@
-app.controller('MenuController', function ($scope, $rootScope, $sessionStorage, $location) {
+app.controller('MenuController', function ($scope, $rootScope, $location, $window) {
 
-    $scope.displayName = $sessionStorage.displayName;
-
-    $rootScope.$on('user:loggedIn', function (event, data) {
-        console.info('user logged in');
-        $scope.displayName = data.displayName;
-    });
+    $scope.displayName = $window.sessionStorage.getItem('displayName');
 
     $scope.logout = function() {
         gapi.auth.signOut();
-        $sessionStorage.$reset();
 
-        $scope.displayName = null;
-
-        $location.path('/login');
+        $window.sessionStorage.clear();
+        $window.location.replace("landing.html");
     };
 
 });
