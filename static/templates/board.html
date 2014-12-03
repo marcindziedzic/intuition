@@ -2,9 +2,10 @@
 
     <div ng-if="board._id === undefined">
         <label for="board_template">Select board template:</label>
-        <select ng-model="board.type" ng-options="template for template in board_templates">
+        <select ng-model="board.type" ng-options="template for template in board_templates" class="form-control">
             <option value="">-- none --</option>
         </select>
+        <br/>
     </div>
 
     <div ng-show="board.type == 'calendar'">
@@ -52,8 +53,8 @@
                 </td>
             </tr>
         </table>
-        <button ng-disabled="boardManagement.$invalid" ng-click="save(board)">Submit</button>
-        <button ng-disabled="!board._id" ng-click="delete(board)">Delete</button>
+        <button class="btn btn-default" ng-disabled="boardManagement.$invalid" ng-click="save(board)">Commit</button>
+        <button class="btn btn-danger" ng-disabled="!board._id" ng-click="delete(board)">Delete</button>
     </div>
 
 </form>
