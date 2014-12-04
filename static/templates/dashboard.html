@@ -16,7 +16,7 @@
             <div class="panel-body">
                 <div class="list-group">
                     <a ng-repeat="board in boards | filter:{archived:'!true'}" ng-href="#/boards/{{board._id}}" class="list-group-item" >
-                        <span class="badge">just now</span>
+                        <span class="badge">{{getDateAgo(board)}}</span>
                         <i class="fa fa-fw fa-calendar"></i> {{board.name}}
                     </a>
                 </div>
@@ -34,7 +34,7 @@
             <div class="panel-body">
                 <div class="list-group">
                      <a ng-repeat="board in boards | filter:{archived:'true'}" ng-href="#/boards/{{board._id}}" class="list-group-item" >
-                        <span class="badge">just now</span>
+                        <span class="badge">{{getDateAgo(board)}}</span>
                         <i class="fa fa-fw fa-calendar"></i> {{board.name}}
                     </a>
                 </div>

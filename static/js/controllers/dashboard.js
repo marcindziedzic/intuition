@@ -3,8 +3,17 @@ app.controller('DashboardController', function ($scope, $http, $window, $modal) 
     var userId = $window.sessionStorage.getItem('userId');
 
     $http.get('/boards?user_id=' + userId).success(function(data) {
-        $scope.boards = data.boards;
+        $scope.boards = data;
     });
+
+    $scope.getDateAgo = function(board) {
+        if (typeof board.when_modified !== typeof undefined) {
+            var date = new Date(board.when_modified.$date);
+            var dateAgo = moment(date).fromNow();
+            return dateAgo;
+        }
+        return '';
+    };
 
     $scope.delete = function () {
         createModalWindow($modal,

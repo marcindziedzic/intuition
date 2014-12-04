@@ -1,5 +1,6 @@
-import json
+from datetime import datetime
 
+from bson.json_util import dumps, loads
 from bson.objectid import ObjectId
 from tornado.web import RequestHandler
 from tornado import gen
@@ -22,7 +23,12 @@ class BoardsHandler(MongoAwareRequestHandler):
     def get(self, *args, **kwargs):
         user_id = self.get_argument('user_id')
 
-        projection = {'_id': 1, 'name': 1, 'archived': 1}
+        projection = {
+            '_id': 1,
+            'name': 1,
+            'archived': 1,
+            'when_modified': 1
+        }
         cursor = self.db.boards.find({'user_id': user_id}, projection)
 
         boards = []
@@ -30,8 +36,7 @@ class BoardsHandler(MongoAwareRequestHandler):
             q = cursor.next_object()
             q['_id'] = str(q['_id'])
             boards.append(q)
-
-        self.write({'boards': boards})
+        self.write(dumps(boards))
 
     @gen.coroutine
     def delete(self, *args, **kwargs):
@@ -47,14 +52,19 @@ class BoardHandler(MongoAwareRequestHandler):
         board_id = self.get_id_as_mongo_object()
         board = yield self.db.boards.find_one(board_id)
         board['_id'] = str(board['_id'])
-        self.write(board)
+        self.write(dumps(board))
 
     @gen.coroutine
     def post(self, *args, **kwargs):
-        board = json.loads(self.request.body.decode('utf-8'))
+        board = loads(self.request.body.decode('utf-8'))
 
+        now = datetime.utcnow()
         if board.get('_id'):
             board['_id'] = ObjectId(board['_id'])
+            board['when_modified'] = now
+        else:
+            board['when_created'] = now
+            board['when_modified'] = now
 
         board_id = yield self.db.boards.save(board)
         self.write({'id': str(board_id)})
