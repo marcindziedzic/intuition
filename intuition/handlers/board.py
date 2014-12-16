@@ -8,6 +8,34 @@ from tornado import gen
 from intuition.utils import days_in_current_month
 
 
+BOARD_INFO_PROJECTION = {
+    '_id': 1,
+    'name': 1,
+    'archived': 1,
+    'when_modified': 1
+}
+
+
+class Board(object):
+
+    @classmethod
+    @gen.coroutine
+    def get_by_user_id(cls, db, user_id):
+        query = {'user_id': user_id}
+        boards = yield Board.get_by_query(db, query)
+        return boards
+
+    @classmethod
+    @gen.coroutine
+    def get_by_query(cls, db, query):
+        cursor = db.boards.find(query, BOARD_INFO_PROJECTION)
+        boards = []
+        while (yield cursor.fetch_next):
+            q = cursor.next_object()
+            boards.append(q)
+        return boards
+
+
 class MongoAwareRequestHandler(RequestHandler):
 
     def prepare(self):
@@ -22,20 +50,7 @@ class BoardsHandler(MongoAwareRequestHandler):
     @gen.coroutine
     def get(self, *args, **kwargs):
         user_id = self.get_argument('user_id')
-
-        projection = {
-            '_id': 1,
-            'name': 1,
-            'archived': 1,
-            'when_modified': 1
-        }
-        cursor = self.db.boards.find({'user_id': user_id}, projection)
-
-        boards = []
-        while (yield cursor.fetch_next):
-            q = cursor.next_object()
-            q['_id'] = str(q['_id'])
-            boards.append(q)
+        boards = yield Board.get_by_user_id(self.db, user_id)
         self.write(dumps(boards))
 
     @gen.coroutine
@@ -51,7 +66,6 @@ class BoardHandler(MongoAwareRequestHandler):
     def get(self, *args, **kwargs):
         board_id = self.get_id_as_mongo_object()
         board = yield self.db.boards.find_one(board_id)
-        board['_id'] = str(board['_id'])
         self.write(dumps(board))
 
     @gen.coroutine
@@ -59,12 +73,9 @@ class BoardHandler(MongoAwareRequestHandler):
         board = loads(self.request.body.decode('utf-8'))
 
         now = datetime.utcnow()
-        if board.get('_id'):
-            board['_id'] = ObjectId(board['_id'])
-            board['when_modified'] = now
-        else:
+        if not board.get('_id'):
             board['when_created'] = now
-            board['when_modified'] = now
+        board['when_modified'] = now
 
         board_id = yield self.db.boards.save(board)
         self.write({'id': str(board_id)})
@@ -74,6 +85,17 @@ class BoardHandler(MongoAwareRequestHandler):
         board_id = self.get_id_as_mongo_object()
         result = yield self.db.boards.remove({"_id": board_id})
         self.write(result)
+
+
+class BoardLinksExpanderHandler(MongoAwareRequestHandler):
+
+    @gen.coroutine
+    def get(self, *args, **kwargs):
+        link_ids = self.get_arguments('links')
+        mongo_link_ids = list(map(lambda l: loads(l), link_ids))
+        query = {'_id': {'$in': mongo_link_ids}}
+        boards = yield Board.get_by_query(self.db, query)
+        self.write(dumps(boards))
 
 
 class BoardDefaultsHandler(RequestHandler):

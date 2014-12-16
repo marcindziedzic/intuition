@@ -21,6 +21,7 @@
     <script type="text/javascript" src="js/services/axis.js"></script>
     <script type="text/javascript" src="js/services/comments.js"></script>
     <script type="text/javascript" src="js/services/colors.js"></script>
+    <script type="text/javascript" src="js/services/links.js"></script>
     <script type="text/javascript" src="js/controllers/common.js"></script>
     <script type="text/javascript" src="js/controllers/menu.js"></script>
     <script type="text/javascript" src="js/controllers/board.js"></script>
@@ -65,8 +66,15 @@
         <div class="modal-header">
             <h3 class="modal-title">{{notificationText}}</h3>
         </div>
-         <div class="modal-body" ng-show="showInputField">
-             <input class="form-control" type="text" ng-model="inputFieldText" />
+         <div class="modal-body" ng-show="showInputField || showSelectBox">
+             <div ng-show="showInputField">
+                 <input class="form-control" type="text" ng-model="inputFieldText" />
+             </div>
+             <div ng-show="showSelectBox">
+                 <select ng-model="selectedOption" ng-options="data.name for data in coll" class="form-control">
+                     <option value="">-- none --</option>
+                 </select>
+             </div>
         </div>
         <div class="modal-footer">
             <button class="btn btn-primary" ng-click="ok()">OK</button>

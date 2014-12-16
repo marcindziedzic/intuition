@@ -54,7 +54,15 @@
             </tr>
         </table>
         <button class="btn btn-default" ng-disabled="boardManagement.$invalid" ng-click="save(board)">Commit</button>
+        <button class="btn btn-default" ng-disabled="boardManagement.$invalid" ng-click="addLinks(board)">Link with</button>
         <button class="btn btn-danger" ng-disabled="!board._id" ng-click="delete(board)">Delete</button>
+
+        <div style="text-align: right">
+            <span ng-repeat="link in getLinks()">
+                <a ng-href="#/boards/{{link._id.$oid}}">{{link.name}}</a>&nbsp;&nbsp;&nbsp;&nbsp;
+            </span>
+        </div>
+
     </div>
 
 </form>

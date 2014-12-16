@@ -1,12 +1,13 @@
 app.controller('BoardController', function ($scope, $http, $routeParams, $window, $modal, $location, axis) {
 
+    var userId = $window.sessionStorage.getItem('userId');
+
     var comments = new CommentsSupport();
     var colors = new ColorsSupport();
+    var links = new LinksSupport($http);
 
     $http.get('/defaults').success(function(defaults) {
-        $scope.board_templates = defaults.board_templates;
-        $scope.current_day = defaults.current_day;
-
+        $scope.board_templates = defaults.board_templates; $scope.current_day = defaults.current_day;
         if ($routeParams.id) {
             $http.get('/board?id=' + $routeParams.id).success(function (data) {
                 $scope.board = data;
@@ -16,6 +17,7 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $window
 
                 colors.init(defaults.color_scheme, $scope.board.cells);
                 comments.init($scope.board.cells);
+                links.init($scope.board.linked_with);
 
                 _watch();
             });
@@ -24,7 +26,7 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $window
             $scope.y_axis = ['comma','separated','list','of','activities'];
 
             $scope.board = { };
-            $scope.board.user_id = $window.sessionStorage.getItem('userId');
+            $scope.board.user_id = userId;
             $scope.board.x_axis_id_seq = 0;
             $scope.board.y_axis_id_seq = 0;
             $scope.board.cells = [];
@@ -37,6 +39,7 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $window
             _watch();
         }
     });
+
 
     var _watch = function () {
         $scope.$watchCollection("x_axis", function (newValue, oldValue) {
@@ -104,9 +107,9 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $window
 
     $scope.save = function(board) {
         board.cells = _readCells();
+        links.extend(board);
 
         $http.post('/board', board).success(function(data) {
-            board._id = data.id;
             $location.path("/boards/" + data.id);
         });
     };
@@ -122,7 +125,6 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $window
     };
 
     $scope.getComment = comments.getByCords;
-
     $scope.addComment = function(event) {
         var currentComment = comments.getById(event.target.id);
 
@@ -138,13 +140,32 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $window
             }
         );
     };
+
+    $scope.getLinks = links.get;
+    $scope.addLinks = function(board) {
+        function renderModal(notYetLinked) {
+            if (notYetLinked.length > 0) {
+                createModalWindow($modal,
+                    {
+                        controller: 'SingleSelectBoxModalController',
+                        notificationText: "Chose a board that you want to link",
+                        showSelectBox: true,
+                        coll: notYetLinked,
+                        onSuccess: links.update
+                    }
+                );
+            }
+        }
+        links.getNotYetLinked(board, renderModal);
+    }
+
 });
 
 app.controller('BoardRemovalController', function ($scope, $modalInstance, $http, $location, params) {
     BaseModalController($scope, $modalInstance, params);
 
     $scope.ok = function () {
-        $http.delete('/board?id=' + params['board']._id).success(function (data) {
+        $http.delete('/board?id=' + params['board']._id.$oid).success(function (data) {
             $modalInstance.close();
             $location.path('/dashboard');
         });

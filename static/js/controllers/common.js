@@ -18,6 +18,17 @@ app.controller('SingleInputFieldModalController', function ($scope, $modalInstan
     };
 });
 
+app.controller('SingleSelectBoxModalController', function ($scope, $modalInstance, params) {
+    BaseModalController($scope, $modalInstance, params);
+
+    $scope.showSelectBox = params['showSelectBox'];
+    $scope.coll = params['coll'];
+
+    $scope.ok = function () {
+        $modalInstance.close($scope.selectedOption);
+    };
+});
+
 function createModalWindow($modal, params) {
     var resolveParams = {};
     for (var key in params) {
