@@ -2,9 +2,9 @@ function LinksSupport($http) {
 
     var linksStore = [];
 
-    function excludeAlreadyLinkedBoards(boards, linkedWith) {
-        var links = _.map(linkedWith, function (objIds) {
-            return objIds.$oid;
+    function excludeAlreadyLinkedBoards(boards) {
+        var links = _.map(linksStore, function (link) {
+            return link._id.$oid;
         });
         return _.filter(boards, function (boardInfo) {
             return !_.contains(links, boardInfo._id.$oid);
@@ -41,7 +41,7 @@ function LinksSupport($http) {
         // filtering has to be done on client's side as client can have uncommitted changes
         getNotYetLinked: function (board, callback) {
             $http.get('/boards?user_id=' + board.user_id).success(function (data) {
-                var notYetLinked = excludeAlreadyLinkedBoards(data, board.linked_with);
+                var notYetLinked = excludeAlreadyLinkedBoards(data);
                 notYetLinked = excludeCurrentBoard(notYetLinked, board);
                 callback(notYetLinked);
             });
