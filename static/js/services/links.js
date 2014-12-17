@@ -58,6 +58,13 @@ function LinksSupport($http) {
             if (!_.isUndefined(boardInfo)) {
                 linksStore.push(boardInfo);
             }
+        },
+
+        remove: function(boardInfo) {
+            if (!_.isUndefined(boardInfo)) {
+                var idx = linksStore.indexOf(boardInfo);
+                linksStore.splice(idx, 1);
+            }
         }
 
     };

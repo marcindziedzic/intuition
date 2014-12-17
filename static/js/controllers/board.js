@@ -142,7 +142,7 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $window
     };
 
     $scope.getLinks = links.get;
-    $scope.addLinks = function(board) {
+    $scope.addLink = function(board) {
         function renderModal(notYetLinked) {
             if (notYetLinked.length > 0) {
                 createModalWindow($modal,
@@ -157,7 +157,10 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $window
             }
         }
         links.getNotYetLinked(board, renderModal);
-    }
+    };
+    $scope.removeLink = function(link) {
+        links.remove(link);
+    };
 
 });
 
