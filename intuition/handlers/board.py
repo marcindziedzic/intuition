@@ -1,10 +1,10 @@
 from datetime import datetime
 
 from bson.json_util import dumps, loads
-from bson.objectid import ObjectId
 from tornado.web import RequestHandler
 from tornado import gen
 
+from intuition.handlers.common import MongoAwareRequestHandler
 from intuition.utils import days_in_current_month
 
 
@@ -34,15 +34,6 @@ class Board(object):
             q = cursor.next_object()
             boards.append(q)
         return boards
-
-
-class MongoAwareRequestHandler(RequestHandler):
-
-    def prepare(self):
-        self.db = self.settings['db']
-
-    def get_id_as_mongo_object(self, arg='id'):
-        return ObjectId(self.get_argument(arg))
 
 
 class BoardsHandler(MongoAwareRequestHandler):

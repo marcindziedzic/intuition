@@ -8,7 +8,7 @@ from intuition.routing import routes
 
 
 if os.environ.get('MONGOHQ_URL'):
-    print('Connecting to mongo using: ', os.environ['MONGOHQ_URL'])
+    print('Connecting to prod mongo instance')
     db = motor.MotorClient(os.environ['MONGOHQ_URL']).get_default_database()
     debug = False
 else:

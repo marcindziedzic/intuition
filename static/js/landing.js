@@ -1,6 +1,6 @@
 var app = angular.module('landingPage', []);
 
-app.controller('LoginController', function ($scope, $location, $window) {
+app.controller('LoginController', function ($scope, $http, $location, $window) {
 
     $scope.signedIn = false;
 
@@ -38,6 +38,8 @@ app.controller('LoginController', function ($scope, $location, $window) {
     };
 
     var _processUserInfo = function (userInfo) {
+        $http.post('/events/sign_in', userInfo).success(function(data) { });
+
         $window.sessionStorage.setItem('userId', userInfo.id);
         $window.sessionStorage.setItem('displayName', userInfo.displayName);
         $window.location.replace("/index.html#/dashboard");
