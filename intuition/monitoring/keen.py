@@ -23,6 +23,16 @@ class FakeKeenClient(object):
         print('keen.add_event ->', collection, body)
 
 
+def push_user_activity(event, user_id, object_type, _object):
+    if _object:
+        client.add_event('user_activities', {
+            'name': event,
+            'user_id': user_id,
+            'object_id': str(_object['_id']),
+            'object_type': object_type
+        })
+
+
 if os.environ.get('KEEN_API_URL'):
     print('Connecting to prod Keen.io instance')
     client = AsyncKeenClient()

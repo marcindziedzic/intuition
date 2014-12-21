@@ -4,8 +4,10 @@ from bson.json_util import dumps, loads
 from tornado.web import RequestHandler
 from tornado import gen
 
-from intuition.handlers.common import MongoAwareRequestHandler
+from intuition.handlers.common import MongoAwareRequestHandler, \
+    JsonAwareRequestHandler
 from intuition.utils import days_in_current_month
+from intuition.monitoring.keen import push_user_activity
 
 
 BOARD_INFO_PROJECTION = {
@@ -47,35 +49,50 @@ class BoardsHandler(MongoAwareRequestHandler):
     @gen.coroutine
     def delete(self, *args, **kwargs):
         user_id = self.get_argument('user_id')
-        result = yield self.db.boards.remove({'user_id': user_id})
-        self.write(result)
+        boards = yield Board.get_by_user_id(self.db, user_id)
+        yield self.db.boards.remove({'user_id': user_id})
+        for board in boards:
+            push_user_activity('bulk board remove', user_id, 'board', board)
+        self.write('ok')
 
 
-class BoardHandler(MongoAwareRequestHandler):
+class BoardHandler(MongoAwareRequestHandler, JsonAwareRequestHandler):
 
     @gen.coroutine
     def get(self, *args, **kwargs):
         board_id = self.get_id_as_mongo_object()
         board = yield self.db.boards.find_one(board_id)
+        self._push_activity('board load', board)
         self.write(dumps(board))
 
     @gen.coroutine
     def post(self, *args, **kwargs):
-        board = loads(self.request.body.decode('utf-8'))
+        board = self.get_body_as_map()
 
-        now = datetime.utcnow()
+        board['when_modified'] = datetime.utcnow()
+        event_name = 'board update'
         if not board.get('_id'):
-            board['when_created'] = now
-        board['when_modified'] = now
+            board['when_created'] = board['when_modified']
+            event_name = 'board creation'
 
         board_id = yield self.db.boards.save(board)
+        board['_id'] = board_id
+
+        self._push_activity(event_name, board)
+
         self.write({'id': str(board_id)})
 
     @gen.coroutine
     def delete(self, *args, **kwargs):
         board_id = self.get_id_as_mongo_object()
-        result = yield self.db.boards.remove({"_id": board_id})
-        self.write(result)
+        board = yield self.db.boards.find_one(board_id)
+        yield self.db.boards.remove({"_id": board_id})
+        self._push_activity('board remove', board)
+        self.write('ok')
+
+    @staticmethod
+    def _push_activity(name, board):
+        push_user_activity(name, board['user_id'], 'board', board)
 
 
 class BoardLinksExpanderHandler(MongoAwareRequestHandler):
