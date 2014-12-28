@@ -18,6 +18,8 @@ module.exports = function (config) {
             'https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular.js',
             'https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular-route.js',
             'https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular-mocks.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/spin.js/2.0.1/spin.min.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/angular-spinner/0.6.0/angular-spinner.min.js',
             'https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore.js',
             'https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.12.0/ui-bootstrap-tpls.min.js',
             'static/js/app.js',

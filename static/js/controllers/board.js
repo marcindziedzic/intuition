@@ -1,4 +1,4 @@
-app.controller('BoardController', function ($scope, $http, $routeParams, $window, $modal, $location, axis) {
+app.controller('BoardController', function ($scope, $http, $routeParams, $window, $modal, $location, axis, usSpinnerService) {
 
     var userId = $window.sessionStorage.getItem('userId');
 
@@ -106,10 +106,13 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $window
     };
 
     $scope.save = function(board) {
+        usSpinnerService.spin('commit-button-spinner');
+
         board.cells = _readCells();
         links.extend(board);
 
         $http.post('/board', board).success(function(data) {
+            usSpinnerService.stop('commit-button-spinner');
             $location.path("/boards/" + data.id);
         });
     };

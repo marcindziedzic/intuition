@@ -1,4 +1,4 @@
-var app = angular.module('main', ["ngRoute", 'ui.bootstrap']);
+var app = angular.module('main', ["ngRoute", 'ui.bootstrap', 'angularSpinner']);
 
 app.config(function ($routeProvider) {
     $routeProvider.
