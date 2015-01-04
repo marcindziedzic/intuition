@@ -8,6 +8,7 @@ routes = [
     url(r"/boards", h.BoardsHandler),
     url(r"/board", h.BoardHandler),
     url(r"/board/links/expand", h.BoardLinksExpanderHandler),
+    url(r"/board/templates", h.BoardTemplatesHandler),
     url(r"/defaults", h.BoardDefaultsHandler),
     url(r"/events/sign_in", u.SignInHandler),
     url(r"/()$", StaticFileHandler, {'path': 'static/landing.html'}),

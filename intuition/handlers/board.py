@@ -6,7 +6,6 @@ from tornado import gen
 
 from intuition.handlers.common import MongoAwareRequestHandler, \
     JsonAwareRequestHandler
-from intuition.utils import days_in_current_month
 from intuition.monitoring.keen import push_user_activity
 
 
@@ -110,8 +109,8 @@ class BoardDefaultsHandler(RequestHandler):
     # better use default colors instead of css classes, it's easier to replace
     # cache everything from this method
     def get(self, *args, **kwargs):
+        from intuition.board.templates import predefined_templates_names
         from datetime import date
-        current_day = date.today().day
 
         color_scheme = [
             'neutral',
@@ -123,10 +122,21 @@ class BoardDefaultsHandler(RequestHandler):
             'great_failure']
 
         d = {
-            'board_templates': ['calendar'],
+            'board_templates': predefined_templates_names,
             'color_scheme': color_scheme,
-            'days_in_current_month': days_in_current_month(),
-            'current_day': current_day,
+            'current_day': date.today().day,
         }
 
         self.write(d)
+
+
+class BoardTemplatesHandler(RequestHandler):
+
+    def get(self, *args, **kwargs):
+        from intuition.board.templates import realize
+        from intuition.board.templates import get_template_by_name
+
+        name = self.get_argument('name')
+        template = get_template_by_name(name)
+        realized_template = realize(template)
+        self.write(dumps(realized_template))

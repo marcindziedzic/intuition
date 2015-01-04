@@ -7,7 +7,9 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $window
     var links = new LinksSupport($http);
 
     $http.get('/defaults').success(function(defaults) {
-        $scope.board_templates = defaults.board_templates; $scope.current_day = defaults.current_day;
+        $scope.board_templates = defaults.board_templates;
+        $scope.current_day = defaults.current_day;
+
         if ($routeParams.id) {
             $http.get('/board?id=' + $routeParams.id).success(function (data) {
                 $scope.board = data;
@@ -22,8 +24,6 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $window
                 _watch();
             });
         } else {
-            $scope.x_axis = _.range(1, defaults.days_in_current_month + 1);
-            $scope.y_axis = ['comma','separated','list','of','activities'];
 
             $scope.board = { };
             $scope.board.user_id = userId;
@@ -31,15 +31,25 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $window
             $scope.board.y_axis_id_seq = 0;
             $scope.board.cells = [];
 
-            $scope.board.x_axis = axis.transformIntoStruct($scope.x_axis, _nextXStruct);
-            $scope.board.y_axis = axis.transformIntoStruct($scope.y_axis, _nextYStruct);
-
             colors.init(defaults.color_scheme, $scope.board.cells);
 
             _watch();
         }
     });
 
+    $scope.loadTemplate = function(templateName) {
+        if (templateName == null) {
+            return;
+        }
+
+        $http.get('/board/templates?name=' + templateName).success(function(template) {
+            $scope.x_axis = template.x_axis;
+            $scope.y_axis = template.y_axis;
+
+            $scope.board.x_axis = axis.transformIntoStruct($scope.x_axis, _nextXStruct);
+            $scope.board.y_axis = axis.transformIntoStruct($scope.y_axis, _nextYStruct);
+        });
+    };
 
     var _watch = function () {
         $scope.$watchCollection("x_axis", function (newValue, oldValue) {
