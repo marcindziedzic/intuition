@@ -45,6 +45,13 @@ class Board(object):
         yield db.boards.remove({"_id": board_id})
         return board
 
+    @classmethod
+    @gen.coroutine
+    def remove_by_user_id(cls, db, user_id):
+        boards = yield Board.get_by_user_id(db, user_id)
+        yield db.boards.remove({'user_id': user_id})
+        return boards
+
 
 class Template(object):
 

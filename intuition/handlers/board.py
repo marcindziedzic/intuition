@@ -18,8 +18,7 @@ class BoardsHandler(RestApiRequestHandler):
     @gen.coroutine
     def delete(self, *args, **kwargs):
         user_id = self.get_argument('user_id')
-        boards = yield Board.get_by_user_id(self.db, user_id)
-        yield self.db.boards.remove({'user_id': user_id})
+        boards = yield Board.remove_by_user_id(self.db, user_id)
         for board in boards:
             push_user_activity('bulk board remove', user_id, 'board', board)
         self.write('ok')
