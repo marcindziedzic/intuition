@@ -1,15 +1,12 @@
 from datetime import datetime
 
 from bson.json_util import dumps, loads
-from tornado.web import RequestHandler
 from tornado import gen
 
 from intuition.handlers.common import MongoAwareRequestHandler, \
     JsonAwareRequestHandler
 from intuition.mongo import get_by_query
 from intuition.monitoring.keen import push_user_activity
-
-from tornado import gen
 
 BOARD_INFO_PROJECTION = {
     '_id': 1,
@@ -31,12 +28,18 @@ class Board(object):
     @classmethod
     @gen.coroutine
     def get_by_query(cls, db, query):
-        cursor = db.boards.find(query, BOARD_INFO_PROJECTION)
-        boards = []
-        while (yield cursor.fetch_next):
-            q = cursor.next_object()
-            boards.append(q)
-        return boards
+        result = yield get_by_query(db.boards, query, BOARD_INFO_PROJECTION)
+        return result
+
+
+class Template(object):
+
+    @classmethod
+    @gen.coroutine
+    def get_templates_names(cls, db):
+        templates = yield get_by_query(
+            db.templates, projection={'_id': 0, 'name': 1})
+        return [t['name'] for t in templates]
 
 
 class BoardsHandler(MongoAwareRequestHandler):
@@ -120,19 +123,13 @@ class BoardDefaultsHandler(MongoAwareRequestHandler):
             'weak_failure',
             'moderate_failure',
             'great_failure']
-        templates = yield self._get_templates_names()
+        templates = yield Template.get_templates_names(self.db)
         d = {
             'board_templates': templates,
             'color_scheme': color_scheme,
             'current_day': date.today().day,
         }
         self.write(d)
-
-    @gen.coroutine
-    def _get_templates_names(self):
-        templates = yield get_by_query(
-            self.db.templates, projection={'_id': 0, 'name': 1})
-        return [t['name'] for t in templates]
 
 
 class BoardTemplatesHandler(MongoAwareRequestHandler):
