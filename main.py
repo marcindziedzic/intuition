@@ -5,29 +5,31 @@ from tornado.ioloop import IOLoop
 from tornado.web import Application
 
 from intuition.routing import routes
+from intuition import mongo
 
 
-if os.environ.get('MONGOHQ_URL'):
-    print('Connecting to prod mongo instance')
-    db = motor.MotorClient(os.environ['MONGOHQ_URL']).get_default_database()
-    debug = False
-else:
-    print('Connecting to local mongo instance')
-    db = motor.MotorClient().intuition
-    debug = True
+def migrate():
+    from intuition.board.templates import predefined_templates
 
-settings = {
-    "debug": debug,
-    "db": db
-}
+    mongo.register('templates', predefined_templates, lookup_key='name')
+    mongo.migrate()
 
 
 def make_app():
+    db = mongo.connect_using(motor.MotorClient)
+    settings = {
+        "db": db
+    }
     return Application(routes, **settings)
 
 
-if __name__ == '__main__':
+def run(app):
     http_port = os.environ.get('PORT', 8888)
-    app = make_app()
     app.listen(http_port)
     IOLoop.current().start()
+
+
+if __name__ == '__main__':
+    migrate()
+    app = make_app()
+    run(app)

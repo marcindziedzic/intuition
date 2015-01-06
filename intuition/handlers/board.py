@@ -6,8 +6,10 @@ from tornado import gen
 
 from intuition.handlers.common import MongoAwareRequestHandler, \
     JsonAwareRequestHandler
+from intuition.mongo import get_by_query
 from intuition.monitoring.keen import push_user_activity
 
+from tornado import gen
 
 BOARD_INFO_PROJECTION = {
     '_id': 1,
@@ -105,13 +107,11 @@ class BoardLinksExpanderHandler(MongoAwareRequestHandler):
         self.write(dumps(boards))
 
 
-class BoardDefaultsHandler(RequestHandler):
-    # better use default colors instead of css classes, it's easier to replace
-    # cache everything from this method
-    def get(self, *args, **kwargs):
-        from intuition.board.templates import predefined_templates_names
-        from datetime import date
+class BoardDefaultsHandler(MongoAwareRequestHandler):
 
+    @gen.coroutine
+    def get(self, *args, **kwargs):
+        from datetime import date
         color_scheme = [
             'neutral',
             'great_success',
@@ -120,23 +120,28 @@ class BoardDefaultsHandler(RequestHandler):
             'weak_failure',
             'moderate_failure',
             'great_failure']
-
+        templates = yield self._get_templates_names()
         d = {
-            'board_templates': predefined_templates_names,
+            'board_templates': templates,
             'color_scheme': color_scheme,
             'current_day': date.today().day,
         }
-
         self.write(d)
 
+    @gen.coroutine
+    def _get_templates_names(self):
+        templates = yield get_by_query(
+            self.db.templates, projection={'_id': 0, 'name': 1})
+        return [t['name'] for t in templates]
 
-class BoardTemplatesHandler(RequestHandler):
 
+class BoardTemplatesHandler(MongoAwareRequestHandler):
+
+    @gen.coroutine
     def get(self, *args, **kwargs):
         from intuition.board.templates import realize
-        from intuition.board.templates import get_template_by_name
 
         name = self.get_argument('name')
-        template = get_template_by_name(name)
+        template = yield self.db.templates.find_one({'name': name})
         realized_template = realize(template)
         self.write(dumps(realized_template))

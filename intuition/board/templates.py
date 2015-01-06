@@ -25,19 +25,8 @@ predefined_templates = [
     current_calendar_month_template,
 ]
 
-predefined_templates_names = [
-    template['name'] for template in predefined_templates
-]
-
 
 # operations
-def get_template_by_name(name):
-    for template in predefined_templates:
-        if template['name'] == name:
-            return template
-        return None
-
-
 def realize(template):
     x_axis_generator = globals().get(template['x_axis_generator'])
     y_axis_generator = globals().get(template['y_axis_generator'])
