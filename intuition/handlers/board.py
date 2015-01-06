@@ -1,21 +1,19 @@
 from datetime import datetime
 
-from bson.json_util import dumps, loads
 from tornado import gen
 
-from intuition.handlers.common import MongoAwareRequestHandler, \
-    JsonAwareRequestHandler
+from intuition.handlers.common import RestApiRequestHandler
 from intuition.model import Board, Template
 from intuition.monitoring.keen import push_user_activity
 
 
-class BoardsHandler(MongoAwareRequestHandler):
+class BoardsHandler(RestApiRequestHandler):
 
     @gen.coroutine
     def get(self, *args, **kwargs):
         user_id = self.get_argument('user_id')
         boards = yield Board.get_by_user_id(self.db, user_id)
-        self.write(dumps(boards))
+        self.write_json(boards)
 
     @gen.coroutine
     def delete(self, *args, **kwargs):
@@ -27,14 +25,14 @@ class BoardsHandler(MongoAwareRequestHandler):
         self.write('ok')
 
 
-class BoardHandler(MongoAwareRequestHandler, JsonAwareRequestHandler):
+class BoardHandler(RestApiRequestHandler):
 
     @gen.coroutine
     def get(self, *args, **kwargs):
         board_id = self.get_id_as_mongo_object()
         board = yield Board.get_by_id(self.db, board_id)
         self._push_activity('board load', board)
-        self.write(dumps(board))
+        self.write_json(board)
 
     @gen.coroutine
     def post(self, *args, **kwargs):
@@ -48,7 +46,7 @@ class BoardHandler(MongoAwareRequestHandler, JsonAwareRequestHandler):
         board = yield Board.save(self.db, board)
 
         self._push_activity(event_name, board)
-        self.write({'id': str(board['_id'])})
+        self.write_json({'id': str(board['_id'])})
 
     @gen.coroutine
     def delete(self, *args, **kwargs):
@@ -62,18 +60,17 @@ class BoardHandler(MongoAwareRequestHandler, JsonAwareRequestHandler):
         push_user_activity(name, board['user_id'], 'board', board)
 
 
-class BoardLinksExpanderHandler(MongoAwareRequestHandler):
+class BoardLinksExpanderHandler(RestApiRequestHandler):
 
     @gen.coroutine
     def get(self, *args, **kwargs):
-        link_ids = self.get_arguments('links')
-        mongo_link_ids = list(map(lambda l: loads(l), link_ids))
+        mongo_link_ids = self.get_args_as_mongo_object_ids('links')
         query = {'_id': {'$in': mongo_link_ids}}
         boards = yield Board.get_by_query(self.db, query)
-        self.write(dumps(boards))
+        self.write_json(boards)
 
 
-class BoardDefaultsHandler(MongoAwareRequestHandler):
+class BoardDefaultsHandler(RestApiRequestHandler):
 
     @gen.coroutine
     def get(self, *args, **kwargs):
@@ -92,10 +89,10 @@ class BoardDefaultsHandler(MongoAwareRequestHandler):
             'color_scheme': color_scheme,
             'current_day': date.today().day,
         }
-        self.write(d)
+        self.write_json(d)
 
 
-class BoardTemplatesHandler(MongoAwareRequestHandler):
+class BoardTemplatesHandler(RestApiRequestHandler):
 
     @gen.coroutine
     def get(self, *args, **kwargs):
@@ -104,4 +101,4 @@ class BoardTemplatesHandler(MongoAwareRequestHandler):
         name = self.get_argument('name')
         template = yield Template.get_by_name(self.db, name)
         realized_template = realize(template)
-        self.write(dumps(realized_template))
+        self.write_json(realized_template)
