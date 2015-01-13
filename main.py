@@ -8,6 +8,12 @@ from intuition.routing import routes
 from intuition import mongo
 
 
+def is_debug_on():
+    debug_on = os.environ.get('MONGOHQ_URL') is None
+    print('Starting app in debug mode:', debug_on)
+    return debug_on
+
+
 def migrate():
     from intuition.board.templates import predefined_templates
 
@@ -18,7 +24,8 @@ def migrate():
 def make_app():
     db = mongo.connect_using(motor.MotorClient)
     settings = {
-        "db": db
+        "db": db,
+        "debug": is_debug_on()
     }
     return Application(routes, **settings)
 

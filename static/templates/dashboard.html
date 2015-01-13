@@ -10,12 +10,19 @@
 <div class="row">
     <div class="col-lg-6">
         <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title"><i class="fa fa-clock-o fa-fw"></i> Active boards</h3>
+            <div class="panel-heading clearfix">
+                <h3 class="panel-title">
+                    <span class="pull-left" style="padding-top: 7.5px">
+                        Active boards
+                    </span>
+                    <span class="pull-right">
+                        <input type="text" class="form-control" placeholder="Search" ng-model="queryActiveBoards"/>
+                    </span>
+                </h3>
             </div>
             <div class="panel-body">
                 <div class="list-group">
-                    <a ng-repeat="board in boards | filter:{archived:'!true'}" ng-href="#/boards/{{board._id.$oid}}" class="list-group-item" >
+                    <a ng-repeat="board in boards  | filter:queryActiveBoards | filter:{archived:'!true' } | orderBy: 'name'" ng-href="#/boards/{{board._id.$oid}}" class="list-group-item" >
                         <span class="badge">{{getDateAgo(board)}}</span>
                         <i class="fa fa-fw fa-calendar"></i> {{board.name}}
                     </a>
@@ -28,12 +35,19 @@
     </div>
     <div class="col-lg-6">
         <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title"><i class="fa fa-clock-o fa-fw"></i> Inactive Boards</h3>
+            <div class="panel-heading clearfix">
+                <h3 class="panel-title">
+                    <span class="pull-left" style="padding-top: 7.5px">
+                        Inactive Boards
+                    </span>
+                    <span class="pull-right">
+                        <input type="text" class="form-control" placeholder="Search" ng-model="queryInactiveBoards"/>
+                    </span>
+                </h3>
             </div>
             <div class="panel-body">
                 <div class="list-group">
-                     <a ng-repeat="board in boards | filter:{archived:'true'}" ng-href="#/boards/{{board._id.$oid}}" class="list-group-item" >
+                     <a ng-repeat="board in boards | filter:queryInactiveBoards | filter:{archived:'true' } | orderBy: 'name'" ng-href="#/boards/{{board._id.$oid}}" class="list-group-item" >
                         <span class="badge">{{getDateAgo(board)}}</span>
                         <i class="fa fa-fw fa-calendar"></i> {{board.name}}
                     </a>
