@@ -90,14 +90,3 @@ class BoardDefaultsHandler(RestApiRequestHandler):
         }
         self.write_json(d)
 
-
-class BoardTemplatesHandler(RestApiRequestHandler):
-
-    @gen.coroutine
-    def get(self, *args, **kwargs):
-        from intuition.board.templates import realize
-
-        name = self.get_argument('name')
-        template = yield Template.get_by_name(self.db, name)
-        realized_template = realize(template)
-        self.write_json(realized_template)

@@ -6,6 +6,10 @@ app.config(function ($routeProvider) {
             templateUrl: "templates/dashboard.html",
             controller: "DashboardController"
         }).
+	when("/templates", {
+            templateUrl: "templates/template.html",
+            controller: "TemplateController"
+        }).
         when("/boards", {
             templateUrl: "templates/board.html",
             controller: "BoardController"

@@ -42,7 +42,7 @@ app.controller('BoardController', function ($scope, $http, $routeParams, $window
             return;
         }
 
-        $http.get('/board/templates?name=' + templateName).success(function(template) {
+        $http.get('/template?name=' + templateName).success(function(template) {
             $scope.x_axis = template.x_axis;
             $scope.y_axis = template.y_axis;
 
