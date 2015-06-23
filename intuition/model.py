@@ -3,7 +3,21 @@ from tornado import gen
 from intuition.mongo import get_by_query
 
 
-class Board(object):
+class Entity(object):
+
+    COLLECTION = NotImplemented
+
+    @classmethod
+    @gen.coroutine
+    def save(cls, db, entity):
+        id = yield db[cls.COLLECTION].save(entity)
+        entity['_id'] = id
+        return entity
+
+
+class Board(Entity):
+
+    COLLECTION = 'boards'
 
     PROJECTION = {
         '_id': 1,
@@ -33,13 +47,6 @@ class Board(object):
 
     @classmethod
     @gen.coroutine
-    def save(cls, db, board):
-        board_id = yield db.boards.save(board)
-        board['_id'] = board_id
-        return board
-
-    @classmethod
-    @gen.coroutine
     def remove(cls, db, board_id):
         board = yield Board.get_by_id(db, board_id)
         yield db.boards.remove({"_id": board_id})
@@ -53,7 +60,9 @@ class Board(object):
         return boards
 
 
-class Template(object):
+class Template(Entity):
+
+    COLLECTION = 'templates'
 
     @classmethod
     @gen.coroutine

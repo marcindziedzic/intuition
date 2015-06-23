@@ -45,9 +45,12 @@ def get_generator_definitions():
     return definitions
 
 
-# templates
+# templates 
 current_calendar_month_template = {
     'name': 'Current Calendar Month',
+    # TODO add support for name and main purpose in templates
+    'board_name': None,
+    'board_main_purpose': None,
     'x_axis_generator': 'Current Month',
     'x_axis_generator_params': None,
     'y_axis_generator': 'Fixed set of fields',
