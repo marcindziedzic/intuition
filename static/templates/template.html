@@ -1,0 +1,59 @@
+<form name="templateManagement">
+
+        <label for="name">Template name:</label>
+        <input id="name" type="text" ng-model="template.name" class="form-control" ng-required="true" />
+        <br/>
+
+        <label for="board_name">Board name:</label>
+        <input id="board_name" type="text" ng-model="template.board_name" class="form-control" />
+        <br/>
+
+        <label for="board_main_purpose">Board main purpose:</label>
+        <input id="board_main_purpose" type="text" ng-model="template.board_main_purpose" class="form-control" />
+        <br/>
+	
+	<!-- TODO eliminate duplication in axis generators -->
+	<label for="xaxis_generator">Select X Axis generator:</label>
+        <select
+                ng-model="template.x_axis_generator"
+                ng-options="generator.name as generator.name for generator in generators"
+		ng-required="true"
+                class="form-control">
+            <option value="">-- none --</option>
+        </select>
+        <br/>
+	<input 
+		type="text" 
+		class="form-control" 
+		ng-if="template.x_axis_generator=='Fixed set of fields'"
+		ng-model="template.x_axis_generator_params" 
+  		ng-list
+		ng-required="true" />
+        <br/>
+
+	<!-- TODO prepare generic way of defining template parameters -->
+	<label for="yaxis_generator">Select Y Axis generator:</label>
+        <select
+                ng-model="template.y_axis_generator"
+                ng-options="generator.name as generator.name for generator in generators"
+		ng-required="true"
+                class="form-control">
+            <option value="">-- none --</option>
+        </select>
+        <br/>
+	<input 
+		type="text" 
+		class="form-control" 
+		ng-if="template.y_axis_generator=='Fixed set of fields'"
+		ng-model="template.y_axis_generator_params" 
+  		ng-list
+		ng-required="true" />
+        <br/>
+
+	<button class="btn btn-default"
+                us-spinner="{radius:30, width:2, length: 16, position:relative}"
+                spinner-key="commit-button-spinner"
+                ng-disabled="templateManagement.$invalid" ng-click="save(template)">
+            Commit
+        </button>
+</form>
