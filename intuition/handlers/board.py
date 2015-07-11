@@ -1,8 +1,7 @@
-from datetime import datetime
-
 from tornado import gen
 
 from intuition.handlers.common import RestApiRequestHandler
+from intuition.handlers.common import CreateUpdateEntityHandler
 from intuition.model import Board, Template
 from intuition.monitoring.keen import push_user_activity
 
@@ -24,39 +23,23 @@ class BoardsHandler(RestApiRequestHandler):
         self.write('ok')
 
 
-class BoardHandler(RestApiRequestHandler):
+class BoardHandler(CreateUpdateEntityHandler):
+
+    ENTITY_TYPE = Board
 
     @gen.coroutine
     def get(self, *args, **kwargs):
         board_id = self.get_id_as_mongo_object()
         board = yield Board.get_by_id(self.db, board_id)
-        self._push_activity('board load', board)
+        self._push_activity('load', board)
         self.write_json(board)
-
-    @gen.coroutine
-    def post(self, *args, **kwargs):
-        board = self.get_body_as_map()
-
-        board['when_modified'] = datetime.utcnow()
-        event_name = 'board update'
-        if not board.get('_id'):
-            board['when_created'] = board['when_modified']
-            event_name = 'board creation'
-        board = yield Board.save(self.db, board)
-
-        self._push_activity(event_name, board)
-        self.write_json({'id': str(board['_id'])})
 
     @gen.coroutine
     def delete(self, *args, **kwargs):
         board_id = self.get_id_as_mongo_object()
         board = yield Board.remove(self.db, board_id)
-        self._push_activity('board remove', board)
+        self._push_activity('remove', board)
         self.write('ok')
-
-    @staticmethod
-    def _push_activity(name, board):
-        push_user_activity(name, board['user_id'], 'board', board)
 
 
 class BoardLinksExpanderHandler(RestApiRequestHandler):

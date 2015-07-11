@@ -1,7 +1,11 @@
+from datetime import datetime
+
 from bson import ObjectId
+from bson.json_util import loads, dumps
+from tornado import gen
 from tornado.web import RequestHandler
 
-from bson.json_util import loads, dumps
+from intuition.monitoring.keen import push_user_activity
 
 
 class JsonAwareRequestHandler(RequestHandler):
@@ -28,3 +32,30 @@ class MongoAwareRequestHandler(RequestHandler):
 
 class RestApiRequestHandler(JsonAwareRequestHandler, MongoAwareRequestHandler):
     pass
+
+
+# TODO write tests for this component
+class CreateUpdateEntityHandler(RestApiRequestHandler):
+
+    ENTITY_TYPE = NotImplemented
+
+    @gen.coroutine
+    def post(self, *args, **kwargs):
+        entity = self.get_body_as_map()
+        event_name = 'update' if entity.get('_id') else 'creation'
+
+        entity['when_modified'] = datetime.utcnow()
+        if not entity.get('_id'):
+            entity['when_created'] = entity['when_modified']
+
+        entity = yield self.ENTITY_TYPE.save(self.db, entity)
+
+        self._push_activity(event_name, entity)
+        self.write_json({'id': str(entity['_id'])})
+
+    def _push_activity(self, name, entity):
+        entity_name = self.ENTITY_TYPE.__name__.lower()
+        event_name = entity_name + ' ' + name
+        push_user_activity(
+            event_name, entity.get('user_id'), entity_name, entity)
+
